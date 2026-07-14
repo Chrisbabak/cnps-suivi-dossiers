@@ -8,7 +8,7 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import StatutSelect from '../components/StatutSelect.jsx'
-import { STATUTS, CANAUX } from '../lib/constants.js'
+import { STATUTS, CANAUX, TYPES, MOTIFS } from '../lib/constants.js'
 import { formatDate, delaiEnJours, enDepassement } from '../lib/dates.js'
 import { telechargerCsv } from '../lib/csv.js'
 import { exportCsv } from '../lib/storage.js'
@@ -22,6 +22,8 @@ export default function Dossiers() {
   const navigate = useNavigate()
 
   const [recherche, setRecherche] = useState('')
+  const [filtreType, setFiltreType] = useState('')
+  const [filtreMotif, setFiltreMotif] = useState('')
   const [filtreStatut, setFiltreStatut] = useState('')
   const [filtreAgence, setFiltreAgence] = useState('')
   const [filtreCanal, setFiltreCanal] = useState('')
@@ -32,6 +34,8 @@ export default function Dossiers() {
     const texte = recherche.trim().toLowerCase()
     return dossiers
       .filter((d) => {
+        if (filtreType && d.type !== filtreType) return false
+        if (filtreMotif && d.motif !== filtreMotif) return false
         if (filtreStatut && d.statut !== filtreStatut) return false
         if (filtreAgence && d.agence !== filtreAgence) return false
         if (filtreCanal && d.canal !== filtreCanal) return false
@@ -46,7 +50,7 @@ export default function Dossiers() {
         const diff = a.dateReception.localeCompare(b.dateReception) || a.numero.localeCompare(b.numero)
         return triRecent ? -diff : diff
       })
-  }, [dossiers, recherche, filtreStatut, filtreAgence, filtreCanal, triRecent])
+  }, [dossiers, recherche, filtreType, filtreMotif, filtreStatut, filtreAgence, filtreCanal, triRecent])
 
   const exporter = () => {
     telechargerCsv(`dossiers-cnps-${aujourdhuiIso()}.csv`, exportCsv())
@@ -94,6 +98,38 @@ export default function Dossiers() {
             placeholder="Ex. D-2026-004, 115004782…"
             className={`${CLASSE_FILTRE} w-full`}
           />
+        </div>
+        <div>
+          <label htmlFor="filtre-type" className="mb-1 block text-xs font-medium text-gray-500">
+            Type
+          </label>
+          <select
+            id="filtre-type"
+            value={filtreType}
+            onChange={(e) => setFiltreType(e.target.value)}
+            className={CLASSE_FILTRE}
+          >
+            <option value="">Tous</option>
+            {TYPES.map((t) => (
+              <option key={t}>{t}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor="filtre-motif" className="mb-1 block text-xs font-medium text-gray-500">
+            Motif
+          </label>
+          <select
+            id="filtre-motif"
+            value={filtreMotif}
+            onChange={(e) => setFiltreMotif(e.target.value)}
+            className={CLASSE_FILTRE}
+          >
+            <option value="">Tous</option>
+            {MOTIFS.map((m) => (
+              <option key={m}>{m}</option>
+            ))}
+          </select>
         </div>
         <div>
           <label htmlFor="filtre-statut" className="mb-1 block text-xs font-medium text-gray-500">
