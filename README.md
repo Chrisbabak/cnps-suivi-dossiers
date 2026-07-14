@@ -46,7 +46,7 @@ Le site est déployé à deux endroits :
 
 | Où | URL | Mise à jour |
 | --- | --- | --- |
-| Netlify | https://cnps-suivi-dossiers.netlify.app | manuelle (CLI ou glisser-déposer) |
+| Netlify | https://cnps-suivi-dossiers.netlify.app | **automatique à chaque push sur `main`** (webhook + build Netlify) |
 | GitHub Pages | https://chrisbabak.github.io/cnps-suivi-dossiers/ | **automatique à chaque push sur `main`** |
 
 Le dépôt GitHub est [Chrisbabak/cnps-suivi-dossiers](https://github.com/Chrisbabak/cnps-suivi-dossiers) ;
