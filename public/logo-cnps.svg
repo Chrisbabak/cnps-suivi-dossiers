@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" role="img" aria-label="Logo CNPS">
+  <!-- Logo CNPS recréé en SVG (version simplifiée pour la maquette).
+       Pour utiliser le logo officiel, remplacer ce fichier par le fichier
+       fourni par la communication, en conservant le nom "logo-cnps.svg". -->
+  <rect x="0" y="0" width="48" height="48" fill="#26418F"/>
+  <rect x="48" y="0" width="48" height="48" fill="#E8820D"/>
+  <rect x="0" y="48" width="48" height="48" fill="#2F9E41"/>
+  <rect x="48" y="48" width="48" height="48" fill="#FFC20E"/>
+  <!-- Silhouette simplifiée : mère portant un enfant -->
+  <g fill="#FFFFFF">
+    <!-- tête et foulard -->
+    <path d="M38 10 c5 0 8.5 3.5 8.5 8 c0 2.5 -1 4.5 -2.5 6 l-12 0 c-1.5 -1.5 -2.5 -3.5 -2.5 -6 c0 -4.5 3.5 -8 8.5 -8 Z"/>
+    <!-- enfant dans le dos -->
+    <circle cx="53" cy="30" r="5"/>
+    <path d="M48 34 c4 -1 8 -1 10 2 c2 3 1.5 8 -1 10 l-9 2 Z"/>
+    <!-- corps / pagne -->
+    <path d="M38 26
+             c-7 2 -11 9 -11.5 17
+             l-1 34
+             c0 3 2.5 5 5.5 5
+             l14 0
+             c3 0 5.5 -2 5.5 -5
+             l-1 -30
+             c3 -2 4 -6 3 -10
+             c-1.5 -6 -7 -11 -14.5 -11 Z"/>
+    <!-- bras tendu (geste de soin) -->
+    <path d="M46 34 c6 1 12 5 15 11 c1 2 0 4 -2 4.5 c-2 .5 -3.5 -.5 -4.5 -2 c-2.5 -4 -6 -6.5 -10 -7.5 Z"/>
+  </g>
+</svg>

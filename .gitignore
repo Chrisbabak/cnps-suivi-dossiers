@@ -1,0 +1,10 @@
+# Dépendances et build
+node_modules/
+dist/
+
+# Netlify (état local de liaison au site)
+.netlify/
+
+# Fichiers système
+.DS_Store
+*.log

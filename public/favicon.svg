@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Favicon aux couleurs du logo CNPS (quatre quadrants). -->
+  <rect width="32" height="32" rx="6" fill="#FFFFFF"/>
+  <rect x="2" y="2" width="14" height="14" rx="2" fill="#26418F"/>
+  <rect x="16" y="2" width="14" height="14" rx="2" fill="#E8820D"/>
+  <rect x="2" y="16" width="14" height="14" rx="2" fill="#2F9E41"/>
+  <rect x="16" y="16" width="14" height="14" rx="2" fill="#FFC20E"/>
+</svg>

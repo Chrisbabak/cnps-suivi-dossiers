@@ -1,0 +1,57 @@
+# Déploiement automatique sur GitHub Pages à chaque push sur main.
+name: Déployer sur GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # permet aussi un lancement manuel depuis l'onglet Actions
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-et-deploiement:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deploiement.outputs.page_url }}
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Installer les dépendances
+        run: npm ci
+
+      - name: Construire le site (base /cnps-suivi-dossiers/)
+        run: npm run build
+        env:
+          BASE_PATH: /cnps-suivi-dossiers/
+
+      # GitHub Pages sert 404.html pour toute URL inconnue :
+      # on y met l'application pour que les routes SPA fonctionnent.
+      - name: Fallback SPA
+        run: cp dist/index.html dist/404.html
+
+      - name: Configurer Pages
+        uses: actions/configure-pages@v5
+
+      - name: Téléverser le build
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - name: Déployer
+        id: deploiement
+        uses: actions/deploy-pages@v4
