@@ -40,6 +40,20 @@ npm run build      # génère le dossier dist/
 npm run preview    # prévisualise le build en local
 ```
 
+## Hébergement
+
+Le site est déployé à deux endroits :
+
+| Où | URL | Mise à jour |
+| --- | --- | --- |
+| Netlify | https://cnps-suivi-dossiers.netlify.app | manuelle (CLI ou glisser-déposer) |
+| GitHub Pages | https://chrisbabak.github.io/cnps-suivi-dossiers/ | **automatique à chaque push sur `main`** |
+
+Le dépôt GitHub est [Chrisbabak/cnps-suivi-dossiers](https://github.com/Chrisbabak/cnps-suivi-dossiers) ;
+le workflow [.github/workflows/deploy-pages.yml](.github/workflows/deploy-pages.yml) reconstruit
+et publie le site sur GitHub Pages après chaque push (variable `BASE_PATH` pour servir le site
+sous le sous-chemin `/cnps-suivi-dossiers/`).
+
 ## Déploiement sur Netlify
 
 Le fichier [netlify.toml](netlify.toml) contient déjà la configuration
