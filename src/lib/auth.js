@@ -26,10 +26,10 @@ export function fermerSession() {
 }
 
 // Libellé du profil affiché dans l'en-tête, ex. :
-// "Profil : Technicien — S. Traoré (Adjamé)" / "Profil : Manager (Adjamé)" / "Profil : Admin"
+// "Profil : Technicien — S. Traoré (Yopougon)" / "Profil : Manager — K. Bamba (Plateau)" / "Profil : Admin"
 export function libelleSession(session = getSession()) {
   if (!session) return ''
   if (session.role === 'admin') return 'Profil : Admin'
-  if (session.role === 'manager') return `Profil : Manager (${session.agence})`
-  return `Profil : Technicien — ${session.nom} (${session.agence})`
+  const role = session.role === 'manager' ? 'Manager' : 'Technicien'
+  return `Profil : ${role}${session.nom ? ` — ${session.nom}` : ''} (${session.agence})`
 }

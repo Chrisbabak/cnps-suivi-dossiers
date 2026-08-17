@@ -11,6 +11,7 @@ import StatutSelect from '../components/StatutSelect.jsx'
 import ModaleHistoriqueAssure from '../components/ModaleHistoriqueAssure.jsx'
 import { getSession } from '../lib/auth.js'
 import { getDossierScope, canDeleteDossier, canReassignDossier } from '../lib/permissions.js'
+import { agentsDeLAgence } from '../lib/annuaire.js'
 import { STATUTS, CANAUX, TYPES, MOTIFS } from '../lib/constants.js'
 import { formatDate, delaiEnJours, enDepassement } from '../lib/dates.js'
 import { telechargerCsv } from '../lib/csv.js'
@@ -326,14 +327,17 @@ export default function Dossiers() {
                         onClick={peutReassigner ? (e) => e.stopPropagation() : undefined}
                       >
                         {peutReassigner ? (
+                          // Réassignation limitée aux techniciens de l'agence du dossier
                           <select
                             value={d.agent}
                             onChange={(e) => reaffecterAgent(d, e.target.value)}
                             aria-label={`Réassigner le dossier ${d.numero}`}
                             className="w-full min-w-[8rem] cursor-pointer rounded-md border border-gray-300 bg-white px-2 py-1 text-xs focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
                           >
-                            {!settings.agents.includes(d.agent) && <option>{d.agent}</option>}
-                            {settings.agents.map((a) => (
+                            {!agentsDeLAgence(settings, d.agence).includes(d.agent) && (
+                              <option>{d.agent}</option>
+                            )}
+                            {agentsDeLAgence(settings, d.agence).map((a) => (
                               <option key={a}>{a}</option>
                             ))}
                           </select>

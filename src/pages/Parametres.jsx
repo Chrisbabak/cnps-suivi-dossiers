@@ -6,6 +6,78 @@
 import { useRef, useState } from 'react'
 import { useData } from '../context/DataContext.jsx'
 
+// Éditeur d'annuaire : personnes rattachées à une agence (ajout / retrait).
+function ListeUtilisateurs({ id, titre, utilisateurs, agences, onChange, placeholder }) {
+  const [nom, setNom] = useState('')
+  const [agence, setAgence] = useState(agences[0] || '')
+
+  const ajouter = (e) => {
+    e.preventDefault()
+    const nomPropre = nom.trim()
+    if (!nomPropre || utilisateurs.some((u) => u.nom === nomPropre)) return
+    onChange([...utilisateurs, { nom: nomPropre, agence }])
+    setNom('')
+  }
+
+  const retirer = (nomARetirer) => onChange(utilisateurs.filter((u) => u.nom !== nomARetirer))
+
+  return (
+    <div className="rounded-lg bg-white p-4 shadow">
+      <h2 className="mb-3 text-sm font-semibold text-gray-800">{titre}</h2>
+      <ul className="mb-3 space-y-1.5">
+        {utilisateurs.map((u) => (
+          <li
+            key={u.nom}
+            className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-1.5 text-sm text-gray-800"
+          >
+            <span>
+              {u.nom} <span className="text-xs text-gray-500">— {u.agence}</span>
+            </span>
+            <button
+              type="button"
+              onClick={() => retirer(u.nom)}
+              aria-label={`Retirer ${u.nom}`}
+              className="rounded px-1.5 text-gray-400 hover:bg-red-50 hover:text-red-600"
+            >
+              ✕
+            </button>
+          </li>
+        ))}
+        {utilisateurs.length === 0 && <li className="text-sm text-gray-400">Liste vide</li>}
+      </ul>
+      <form onSubmit={ajouter} className="flex flex-wrap gap-2">
+        <label htmlFor={id} className="sr-only">
+          Ajouter à « {titre} »
+        </label>
+        <input
+          id={id}
+          type="text"
+          value={nom}
+          onChange={(e) => setNom(e.target.value)}
+          placeholder={placeholder}
+          className="min-w-0 flex-1 rounded-md border border-gray-300 px-3 py-1.5 text-sm shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
+        />
+        <select
+          value={agence}
+          onChange={(e) => setAgence(e.target.value)}
+          aria-label="Agence de rattachement"
+          className="rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-cnps-500 focus:outline-none"
+        >
+          {agences.map((a) => (
+            <option key={a}>{a}</option>
+          ))}
+        </select>
+        <button
+          type="submit"
+          className="rounded-md bg-cnps-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-cnps-700"
+        >
+          Ajouter
+        </button>
+      </form>
+    </div>
+  )
+}
+
 // Éditeur générique de liste de valeurs (ajout / suppression).
 function ListeEditable({ id, titre, valeurs, onChange, placeholder }) {
   const [nouvelle, setNouvelle] = useState('')
@@ -122,12 +194,22 @@ export default function Parametres() {
           placeholder="Nom de la nouvelle agence"
         />
 
-        <ListeEditable
+        <ListeUtilisateurs
           id="ajout-agent"
-          titre="Agents"
-          valeurs={settings.agents}
+          titre="Techniciens (annuaire : une agence par personne)"
+          utilisateurs={settings.agents}
+          agences={settings.agences}
           onChange={(agents) => majSettings({ agents })}
-          placeholder="Nom du nouvel agent"
+          placeholder="Nom du nouveau technicien"
+        />
+
+        <ListeUtilisateurs
+          id="ajout-manager"
+          titre="Managers (un responsable par agence)"
+          utilisateurs={settings.managers}
+          agences={settings.agences}
+          onChange={(managers) => majSettings({ managers })}
+          placeholder="Nom du nouveau manager"
         />
 
         <div className="rounded-lg bg-white p-4 shadow">

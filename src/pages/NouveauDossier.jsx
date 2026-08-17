@@ -6,6 +6,8 @@
 import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
+import { getSession } from '../lib/auth.js'
+import { agentsDeLAgence } from '../lib/annuaire.js'
 import { CANAUX, TYPES, MOTIFS, PRIORITES } from '../lib/constants.js'
 import { aujourdhuiIso, delaiEnJours } from '../lib/dates.js'
 
@@ -35,23 +37,43 @@ export default function NouveauDossier() {
   // Matricule pré-rempli quand on vient de la fiche matricule (?matricule=…).
   const [parametres] = useSearchParams()
 
+  // Périmètre de la session : technicien/manager créent dans LEUR agence
+  // (agence verrouillée) ; le technicien est l'agent par défaut.
+  const session = getSession()
+  const agenceVerrouillee = session?.role !== 'admin' && Boolean(session?.agence)
+
   // Valeurs initiales du formulaire (réutilisées après chaque enregistrement).
-  const formulaireVide = () => ({
-    type: 'Demande',
-    canal: 'Agence',
-    motif: MOTIFS[0],
-    matricule: parametres.get('matricule') || '',
-    agence: settings.agences[0] || '',
-    agent: settings.agents[0] || '',
-    priorite: 'Normale',
-    commentaire: '',
-    dateReception: aujourdhuiIso(),
-  })
+  const formulaireVide = () => {
+    const agence = session?.agence || settings.agences[0] || ''
+    const agentsAgence = agentsDeLAgence(settings, agence)
+    return {
+      type: 'Demande',
+      canal: 'Agence',
+      motif: MOTIFS[0],
+      matricule: parametres.get('matricule') || '',
+      agence,
+      agent: session?.role === 'technicien' ? session.nom : agentsAgence[0] || '',
+      priorite: 'Normale',
+      commentaire: '',
+      dateReception: aujourdhuiIso(),
+    }
+  }
 
   const [form, setForm] = useState(formulaireVide)
   const [confirmation, setConfirmation] = useState(null)
 
   const changer = (champ) => (e) => setForm({ ...form, [champ]: e.target.value })
+
+  // Changer d'agence (admin) repositionne l'agent sur un technicien de
+  // cette agence — un dossier est traité par un agent de son agence.
+  const changerAgence = (e) => {
+    const agence = e.target.value
+    const agentsAgence = agentsDeLAgence(settings, agence)
+    setForm({ ...form, agence, agent: agentsAgence[0] || '' })
+  }
+
+  // Agents proposés : ceux de l'agence du formulaire (annuaire).
+  const agentsProposes = agentsDeLAgence(settings, form.agence)
 
   // Alerte doublon (vision nationale) : dossiers NON clôturés déjà ouverts
   // pour le matricule saisi, toutes agences confondues. Non bloquant.
@@ -145,7 +167,15 @@ export default function NouveauDossier() {
           </Champ>
 
           <Champ id="agence" label="Agence">
-            <select id="agence" value={form.agence} onChange={changer('agence')} className={CLASSE_CHAMP}>
+            {/* Technicien / manager : agence verrouillée sur leur rattachement */}
+            <select
+              id="agence"
+              value={form.agence}
+              onChange={changerAgence}
+              disabled={agenceVerrouillee}
+              title={agenceVerrouillee ? `Votre agence : ${session.agence}` : undefined}
+              className={`${CLASSE_CHAMP} disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500`}
+            >
               {settings.agences.map((a) => (
                 <option key={a}>{a}</option>
               ))}
@@ -153,8 +183,10 @@ export default function NouveauDossier() {
           </Champ>
 
           <Champ id="agent" label="Agent en charge">
+            {/* Agents de l'agence sélectionnée (annuaire) */}
             <select id="agent" value={form.agent} onChange={changer('agent')} className={CLASSE_CHAMP}>
-              {settings.agents.map((a) => (
+              {!agentsProposes.includes(form.agent) && form.agent && <option>{form.agent}</option>}
+              {agentsProposes.map((a) => (
                 <option key={a}>{a}</option>
               ))}
             </select>

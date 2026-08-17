@@ -18,14 +18,17 @@ Maquette web de **préfiguration CRM** pour le suivi des demandes et réclamatio
 ## Rôles et périmètres
 
 L'application s'ouvre sur un **sélecteur de profil** (POC : pas de mot de passe ni de
-comptes). La session `{ role, agence, nom }` est stockée en localStorage (clé `session`)
-et survit au rechargement ; « Se déconnecter » renvoie au sélecteur.
+comptes). On choisit une **personne dans l'annuaire** — techniciens et managers sont
+rattachés à une agence ([src/lib/annuaire.js](src/lib/annuaire.js), listes éditables dans
+Paramètres) — et **l'agence est déduite automatiquement**. La session `{ role, agence, nom }`
+est stockée en localStorage (clé `session`) et survit au rechargement ; « Se déconnecter »
+renvoie au sélecteur. Le futur système de comptes n'aura qu'à alimenter cet annuaire.
 
 | | Technicien | Manager | Admin |
 | --- | --- | --- | --- |
-| À la connexion | agence + nom | agence | — |
+| À la connexion | nom (agence déduite) | nom (agence déduite) | — |
 | Accueil | ses dossiers + agence (lecture) | dossiers et compteurs de l'agence | compteurs globaux, toutes agences |
-| Dossiers | agence **verrouillée** | agence **verrouillée** + **réassignation** d'agent | toutes agences |
+| Dossiers | agence **verrouillée** | agence **verrouillée** + **réassignation** (techniciens de son agence) | toutes agences |
 | Supprimer un dossier | non | non | oui |
 | Pilotage | masqué | limité à son agence | national |
 | Paramètres | masqué | masqué | visible |

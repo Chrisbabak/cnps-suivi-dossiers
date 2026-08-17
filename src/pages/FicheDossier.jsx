@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import StatutSelect from '../components/StatutSelect.jsx'
+import { agentsDeLAgence } from '../lib/annuaire.js'
 import { STATUTS, PRIORITES } from '../lib/constants.js'
 import { formatDate, formatDateHeure, delaiEnJours, enDepassement } from '../lib/dates.js'
 
@@ -192,15 +193,18 @@ export default function FicheDossier() {
           <Info libelle="Reçu le">{formatDate(dossier.dateReception)}</Info>
           <Info libelle="Clôturé le">{formatDate(dossier.dateCloture)}</Info>
           <Info libelle="Agent en charge">
+            {/* Réaffectation limitée aux techniciens de l'agence du dossier */}
             <select
               value={dossier.agent}
               onChange={(e) => reaffecterAgent(dossier, e.target.value)}
               aria-label="Réaffecter le dossier à un agent"
               className={CLASSE_SELECT}
             >
-              {/* L'agent actuel reste proposé même s'il a été retiré des paramètres */}
-              {!settings.agents.includes(dossier.agent) && <option>{dossier.agent}</option>}
-              {settings.agents.map((a) => (
+              {/* L'agent actuel reste proposé même s'il a été retiré de l'annuaire */}
+              {!agentsDeLAgence(settings, dossier.agence).includes(dossier.agent) && (
+                <option>{dossier.agent}</option>
+              )}
+              {agentsDeLAgence(settings, dossier.agence).map((a) => (
                 <option key={a}>{a}</option>
               ))}
             </select>
@@ -254,8 +258,10 @@ export default function FicheDossier() {
                 onChange={(e) => setAuteur(e.target.value)}
                 className="rounded-md border border-gray-300 px-2 py-1 text-xs shadow-sm focus:border-cnps-500 focus:outline-none"
               >
-                {!settings.agents.includes(dossier.agent) && <option>{dossier.agent}</option>}
-                {settings.agents.map((a) => (
+                {!agentsDeLAgence(settings, dossier.agence).includes(dossier.agent) && (
+                  <option>{dossier.agent}</option>
+                )}
+                {agentsDeLAgence(settings, dossier.agence).map((a) => (
                   <option key={a}>{a}</option>
                 ))}
               </select>

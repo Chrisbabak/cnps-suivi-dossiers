@@ -1,7 +1,8 @@
 // ---------------------------------------------------------------------------
 // Écran de connexion (POC) : sélecteur de profil, sans mot de passe.
-// - Technicien / Manager : choisir l'agence (+ le nom pour le technicien)
-// - Admin : aucun champ supplémentaire
+// - Technicien / Manager : choisir la PERSONNE dans l'annuaire — son agence
+//   de rattachement est déduite automatiquement (affichée en dessous).
+// - Admin : aucun champ supplémentaire.
 // La session est stockée en localStorage et survit au rechargement.
 // ---------------------------------------------------------------------------
 
@@ -9,6 +10,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { ouvrirSession } from '../lib/auth.js'
 import { ROLES } from '../lib/permissions.js'
+import { agenceDeAgent, agenceDeManager } from '../lib/annuaire.js'
 import { useData } from '../context/DataContext.jsx'
 
 const CLASSE_CHAMP =
@@ -19,16 +21,23 @@ export default function Connexion({ onConnexion }) {
   const { settings } = useData()
 
   const [role, setRole] = useState('technicien')
-  const [agence, setAgence] = useState(settings.agences[0] || '')
-  const [nom, setNom] = useState(settings.agents[0] || '')
+  const [nomAgent, setNomAgent] = useState(settings.agents[0]?.nom || '')
+  const [nomManager, setNomManager] = useState(settings.managers[0]?.nom || '')
+
+  // L'agence n'est jamais saisie : elle est déduite de l'annuaire.
+  const agenceDeduite =
+    role === 'technicien'
+      ? agenceDeAgent(settings, nomAgent)
+      : role === 'manager'
+        ? agenceDeManager(settings, nomManager)
+        : null
 
   const soumettre = (e) => {
     e.preventDefault()
-    // Admin : pas d'agence ni de nom ; Manager : agence seule.
     const session = {
       role,
-      agence: role === 'admin' ? null : agence,
-      nom: role === 'technicien' ? nom : null,
+      agence: agenceDeduite,
+      nom: role === 'admin' ? null : role === 'manager' ? nomManager : nomAgent,
     }
     ouvrirSession(session)
     navigate('/accueil', { replace: true })
@@ -76,24 +85,6 @@ export default function Connexion({ onConnexion }) {
                 </select>
               </div>
 
-              {role !== 'admin' && (
-                <div>
-                  <label htmlFor="agence" className="mb-1 block text-sm font-medium text-gray-700">
-                    Agence
-                  </label>
-                  <select
-                    id="agence"
-                    value={agence}
-                    onChange={(e) => setAgence(e.target.value)}
-                    className={CLASSE_CHAMP}
-                  >
-                    {settings.agences.map((a) => (
-                      <option key={a}>{a}</option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
               {role === 'technicien' && (
                 <div>
                   <label htmlFor="nom" className="mb-1 block text-sm font-medium text-gray-700">
@@ -101,15 +92,45 @@ export default function Connexion({ onConnexion }) {
                   </label>
                   <select
                     id="nom"
-                    value={nom}
-                    onChange={(e) => setNom(e.target.value)}
+                    value={nomAgent}
+                    onChange={(e) => setNomAgent(e.target.value)}
                     className={CLASSE_CHAMP}
                   >
                     {settings.agents.map((a) => (
-                      <option key={a}>{a}</option>
+                      <option key={a.nom} value={a.nom}>
+                        {a.nom} — {a.agence}
+                      </option>
                     ))}
                   </select>
                 </div>
+              )}
+
+              {role === 'manager' && (
+                <div>
+                  <label htmlFor="nom-manager" className="mb-1 block text-sm font-medium text-gray-700">
+                    Nom
+                  </label>
+                  <select
+                    id="nom-manager"
+                    value={nomManager}
+                    onChange={(e) => setNomManager(e.target.value)}
+                    className={CLASSE_CHAMP}
+                  >
+                    {settings.managers.map((m) => (
+                      <option key={m.nom} value={m.nom}>
+                        {m.nom} — {m.agence}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {/* Agence déduite automatiquement de l'annuaire (jamais saisie) */}
+              {role !== 'admin' && agenceDeduite && (
+                <p className="rounded-md bg-cnps-50 px-3 py-2 text-xs text-cnps-800">
+                  Agence de rattachement : <strong>{agenceDeduite}</strong>{' '}
+                  <span className="text-cnps-600">(déduite automatiquement)</span>
+                </p>
               )}
 
               <button

@@ -51,8 +51,31 @@ export const AGENCES = [
 export const REGION_PAR_AGENCE = Object.fromEntries(AGENCES.map((a) => [a.nom, a.region]))
 
 // Paramètres par défaut (utilisés au premier lancement, modifiables ensuite).
+// L'ANNUAIRE relie chaque utilisateur à SON agence : c'est lui qui déduit
+// l'agence à la connexion et délimite les périmètres. Le futur système de
+// gestion des comptes n'aura qu'à alimenter ces listes.
 export const DEFAULT_SETTINGS = {
   agences: AGENCES.map((a) => a.nom),
-  agents: ['A. Kouassi', 'M. Diabaté', 'S. Traoré', "F. N'Guessan"],
+  // Techniciens : une agence de rattachement par personne.
+  agents: [
+    { nom: 'A. Kouassi', agence: 'Plateau' },
+    { nom: 'M. Diabaté', agence: 'Plateau' },
+    { nom: 'S. Traoré', agence: 'Yopougon' },
+    { nom: "F. N'Guessan", agence: 'Bouaké' },
+    { nom: 'B. Koné', agence: 'Cocody' },
+    { nom: 'R. Aka', agence: 'San Pedro' },
+    { nom: 'I. Ouattara', agence: 'Korhogo' },
+    { nom: 'D. Yao', agence: 'Yamoussoukro' },
+  ],
+  // Managers : un responsable par agence active.
+  managers: [
+    { nom: 'K. Bamba', agence: 'Plateau' },
+    { nom: 'A. Kouamé', agence: 'Bouaké' },
+    { nom: 'M. Koffi', agence: 'Yopougon' },
+    { nom: 'S. Gnamien', agence: 'Cocody' },
+    { nom: 'J. Tanoh', agence: 'San Pedro' },
+    { nom: 'L. Coulibaly', agence: 'Korhogo' },
+    { nom: "P. N'Dri", agence: 'Yamoussoukro' },
+  ],
   delaiCible: 5, // délai cible de traitement, en jours
 }
