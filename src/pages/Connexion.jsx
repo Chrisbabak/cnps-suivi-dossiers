@@ -18,9 +18,10 @@ export default function Connexion({ onConnexion }) {
 
   const soumettre = (e) => {
     e.preventDefault()
-    if (verifierIdentifiants(identifiant, motDePasse)) {
-      ouvrirSession()
-      navigate('/accueil', { replace: true }) // atterrissage : tableau de bord du technicien
+    const compte = verifierIdentifiants(identifiant, motDePasse)
+    if (compte) {
+      ouvrirSession(compte.role) // le rôle (technicien / chef) détermine la vue d'accueil
+      navigate('/accueil', { replace: true })
       onConnexion()
     } else {
       setErreur('Identifiant ou mot de passe incorrect.')

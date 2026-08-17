@@ -11,10 +11,10 @@
 import { dossiersVersCsv } from './csv.js'
 import { DEFAULT_SETTINGS } from './constants.js'
 
-// v4 : données de démo concentrées sur moins d'agences (répartition parlante).
+// v5 : matricules récurrents dans la démo (fiche matricule parlante).
 // Un changement de version repart d'un état neuf — les données de démo
 // sont rechargées automatiquement au lancement suivant.
-const STORAGE_KEY = 'cnps-suivi-dossiers-v4'
+const STORAGE_KEY = 'cnps-suivi-dossiers-v5'
 
 // Lit l'état complet { dossiers, settings } avec valeurs par défaut.
 function lireEtat() {

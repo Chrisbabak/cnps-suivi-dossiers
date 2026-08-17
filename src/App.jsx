@@ -13,6 +13,7 @@ import Accueil from './pages/Accueil.jsx'
 import Connexion from './pages/Connexion.jsx'
 import Dossiers from './pages/Dossiers.jsx'
 import FicheDossier from './pages/FicheDossier.jsx'
+import FicheMatricule from './pages/FicheMatricule.jsx'
 import NouveauDossier from './pages/NouveauDossier.jsx'
 import Pilotage from './pages/Pilotage.jsx'
 import Parametres from './pages/Parametres.jsx'
@@ -40,6 +41,7 @@ export default function App() {
               <Route path="/accueil" element={<Accueil />} />
               <Route path="/dossiers" element={<Dossiers />} />
               <Route path="/dossiers/:id" element={<FicheDossier />} />
+              <Route path="/matricules/:matricule" element={<FicheMatricule />} />
               <Route path="/nouveau" element={<NouveauDossier />} />
               <Route path="/pilotage" element={<Pilotage />} />
               <Route path="/parametres" element={<Parametres />} />

@@ -289,8 +289,16 @@ export default function Dossiers() {
                       <td className="px-3 py-2 text-gray-800" title={d.commentaire || undefined}>
                         {d.motif}
                       </td>
-                      <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-gray-700">
-                        {d.matricule}
+                      <td className="whitespace-nowrap px-3 py-2">
+                        {/* Lien vers la fiche matricule (vue 360° assuré/employeur) */}
+                        <Link
+                          to={`/matricules/${encodeURIComponent(d.matricule)}`}
+                          onClick={(e) => e.stopPropagation()}
+                          title={`Voir la fiche du matricule ${d.matricule}`}
+                          className="font-mono text-xs text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
+                        >
+                          {d.matricule}
+                        </Link>
                       </td>
                       <td className="whitespace-nowrap px-3 py-2 text-gray-600">{d.canal}</td>
                       <td className="whitespace-nowrap px-3 py-2 text-gray-600">{d.agence}</td>

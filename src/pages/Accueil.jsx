@@ -1,16 +1,17 @@
 // ---------------------------------------------------------------------------
-// Page "Accueil" : tableau de bord du technicien connecté au poste.
-// 1. Ses dossiers ouverts (avec alertes de dépassement / urgences)
-// 2. Les dossiers ouverts de son agence
+// Page "Accueil" : tableau de bord adapté au profil connecté.
+// - Technicien : ses dossiers ouverts, puis ceux de son agence.
+// - Chef d'agence : indicateurs de l'agence, charge par agent, dossiers ouverts.
 // Le technicien et l'agence sont choisis via des sélecteurs, mémorisés
 // sur le poste (dans le vrai CRM, l'identité viendra du compte de l'agent).
 // ---------------------------------------------------------------------------
 
 import { useEffect, useMemo, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
-import { STYLES_STATUT } from '../components/StatutSelect.jsx'
-import { formatDate, delaiEnJours, enDepassement } from '../lib/dates.js'
+import TableDossiers from '../components/TableDossiers.jsx'
+import { getRole } from '../lib/auth.js'
+import { delaiEnJours, enDepassement } from '../lib/dates.js'
 
 const CLE_POSTE = 'cnps-poste-v1' // choix technicien/agence propre à ce poste
 
@@ -18,79 +19,47 @@ const CLASSE_SELECT =
   'rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-900 shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500'
 
 // Carte indicateur compacte.
-function Indicateur({ libelle, valeur, alerte = false }) {
+function Indicateur({ libelle, valeur, detail, alerte = false }) {
   return (
     <div className="rounded-lg bg-white p-4 shadow">
       <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{libelle}</p>
-      <p className={`mt-1 text-2xl font-bold ${alerte && valeur > 0 ? 'text-red-600' : 'text-gray-900'}`}>
+      <p
+        className={`mt-1 text-2xl font-bold ${
+          alerte && parseInt(valeur, 10) > 0 ? 'text-red-600' : 'text-gray-900'
+        }`}
+      >
         {valeur}
       </p>
+      {detail && <p className="mt-0.5 text-xs text-gray-500">{detail}</p>}
     </div>
   )
 }
 
-// Tableau compact de dossiers (lignes cliquables vers la fiche).
-function TableCompacte({ dossiers, delaiCible, messageVide }) {
-  const navigate = useNavigate()
-  if (dossiers.length === 0) {
-    return <p className="px-4 py-6 text-center text-sm text-gray-400">{messageVide}</p>
-  }
+// Barres horizontales de charge par agent (dossiers ouverts).
+function ChargeParAgent({ donnees }) {
+  const max = Math.max(...donnees.map((d) => d.valeur), 1)
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200 text-sm">
-        <thead className="bg-gray-50 text-left text-xs uppercase tracking-wide text-gray-500">
-          <tr>
-            <th scope="col" className="px-3 py-2 font-semibold">N° dossier</th>
-            <th scope="col" className="px-3 py-2 font-semibold">Reçu le</th>
-            <th scope="col" className="px-3 py-2 font-semibold">Type</th>
-            <th scope="col" className="px-3 py-2 font-semibold">Motif</th>
-            <th scope="col" className="px-3 py-2 font-semibold">Matricule</th>
-            <th scope="col" className="px-3 py-2 font-semibold">Agent</th>
-            <th scope="col" className="px-3 py-2 font-semibold">Statut</th>
-            <th scope="col" className="px-3 py-2 text-right font-semibold">Délai</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-gray-100">
-          {dossiers.map((d) => {
-            const depasse = enDepassement(d, delaiCible)
-            return (
-              <tr
-                key={d.id}
-                onClick={() => navigate(`/dossiers/${d.id}`)}
-                title="Ouvrir la fiche du dossier"
-                className={`cursor-pointer ${depasse ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'}`}
-              >
-                <td className="whitespace-nowrap px-3 py-2 font-mono text-xs font-semibold text-gray-900">
-                  {d.numero}
-                  {d.priorite === 'Urgente' && (
-                    <span className="ml-1.5 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-700">
-                      Urgent
-                    </span>
-                  )}
-                </td>
-                <td className="whitespace-nowrap px-3 py-2 text-gray-600">{formatDate(d.dateReception)}</td>
-                <td className="whitespace-nowrap px-3 py-2 text-gray-600">{d.type}</td>
-                <td className="px-3 py-2 text-gray-800">{d.motif}</td>
-                <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-gray-700">{d.matricule}</td>
-                <td className="whitespace-nowrap px-3 py-2 text-gray-600">{d.agent}</td>
-                <td className="whitespace-nowrap px-3 py-2">
-                  <span
-                    className={`inline-block rounded-full border px-2 py-0.5 text-xs font-medium ${
-                      STYLES_STATUT[d.statut] || 'bg-gray-100 text-gray-800 border-gray-300'
-                    }`}
-                  >
-                    {d.statut}
-                  </span>
-                </td>
-                <td className={`whitespace-nowrap px-3 py-2 text-right font-medium ${depasse ? 'text-red-600' : 'text-gray-700'}`}>
-                  {delaiEnJours(d)} j{depasse && <span aria-hidden="true"> ⚠</span>}
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
+    <ul className="space-y-2">
+      {donnees.map(({ label, valeur }) => (
+        <li key={label}>
+          <div className="mb-0.5 flex items-baseline justify-between gap-2 text-xs">
+            <span className="truncate text-gray-700">{label}</span>
+            <span className="font-semibold text-gray-900">{valeur}</span>
+          </div>
+          <div
+            className="h-2.5 w-full overflow-hidden rounded-full bg-gray-100"
+            role="img"
+            aria-label={`${label} : ${valeur} dossier(s) ouvert(s)`}
+          >
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${(valeur / max) * 100}%`, backgroundColor: '#2F9E41' }}
+            />
+          </div>
+        </li>
+      ))}
+      {donnees.length === 0 && <li className="text-sm text-gray-400">Aucun dossier ouvert</li>}
+    </ul>
   )
 }
 
@@ -104,6 +73,7 @@ function trierParPriorite(dossiers, delaiCible) {
 
 export default function Accueil() {
   const { dossiers, settings } = useData()
+  const role = getRole()
 
   // Technicien + agence du poste, mémorisés dans le navigateur.
   const [poste, setPoste] = useState(() => {
@@ -127,7 +97,17 @@ export default function Accueil() {
   const stats = useMemo(() => {
     const mesDossiers = dossiers.filter((d) => d.agent === poste.agent)
     const mesOuverts = mesDossiers.filter((d) => d.statut !== 'Clôturé')
-    const agenceOuverts = dossiers.filter((d) => d.agence === poste.agence && d.statut !== 'Clôturé')
+    const agenceTous = dossiers.filter((d) => d.agence === poste.agence)
+    const agenceOuverts = agenceTous.filter((d) => d.statut !== 'Clôturé')
+    const agenceClotures = agenceTous.filter((d) => d.statut === 'Clôturé')
+    const agenceDansDelais = agenceClotures.filter((d) => delaiEnJours(d) <= cible).length
+
+    // Charge par agent au sein de l'agence (vue chef).
+    const compteParAgent = new Map()
+    for (const d of agenceOuverts) {
+      compteParAgent.set(d.agent, (compteParAgent.get(d.agent) || 0) + 1)
+    }
+
     return {
       mesOuverts: trierParPriorite(mesOuverts, cible),
       mesDepassements: mesOuverts.filter((d) => enDepassement(d, cible)).length,
@@ -135,9 +115,91 @@ export default function Accueil() {
       mesClotures: mesDossiers.filter((d) => d.statut === 'Clôturé').length,
       agenceOuverts: trierParPriorite(agenceOuverts, cible),
       agenceDepassements: agenceOuverts.filter((d) => enDepassement(d, cible)).length,
+      agenceUrgents: agenceOuverts.filter((d) => d.priorite === 'Urgente').length,
+      agencePctDelais:
+        agenceClotures.length > 0
+          ? `${Math.round((100 * agenceDansDelais) / agenceClotures.length)} %`
+          : '—',
+      chargeParAgent: [...compteParAgent.entries()]
+        .map(([label, valeur]) => ({ label, valeur }))
+        .sort((a, b) => b.valeur - a.valeur),
     }
   }, [dossiers, poste, cible])
 
+  // ------------------------------------------------------------------ CHEF --
+  if (role === 'chef') {
+    return (
+      <div>
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h1 className="text-xl font-semibold text-gray-900">Bonjour</h1>
+            <p className="text-sm text-gray-500">
+              Vue chef d'agence — situation de l'agence {poste.agence}.
+            </p>
+          </div>
+          <div>
+            <label htmlFor="poste-agence" className="mb-1 block text-xs font-medium text-gray-500">
+              Agence
+            </label>
+            <select
+              id="poste-agence"
+              value={poste.agence}
+              onChange={(e) => setPoste({ ...poste, agence: e.target.value })}
+              className={CLASSE_SELECT}
+            >
+              {settings.agences.map((a) => (
+                <option key={a}>{a}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        {/* Indicateurs de l'agence */}
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Indicateur libelle="Dossiers ouverts" valeur={stats.agenceOuverts.length} />
+          <Indicateur libelle="En dépassement" valeur={stats.agenceDepassements} alerte />
+          <Indicateur libelle="Urgents" valeur={stats.agenceUrgents} alerte />
+          <Indicateur
+            libelle="Dans les délais"
+            valeur={stats.agencePctDelais}
+            detail={`clôturés · cible ${cible} j`}
+          />
+        </div>
+
+        {/* Charge par agent */}
+        <div className="mb-4 rounded-lg bg-white p-4 shadow">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-800">
+              Charge par agent (dossiers ouverts de l'agence)
+            </h2>
+            <Link to="/pilotage" className="text-sm font-medium text-cnps-600 hover:underline">
+              Pilotage global →
+            </Link>
+          </div>
+          <ChargeParAgent donnees={stats.chargeParAgent} />
+        </div>
+
+        {/* Dossiers ouverts de l'agence */}
+        <div className="overflow-hidden rounded-lg bg-white shadow">
+          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+            <h2 className="text-sm font-semibold text-gray-800">
+              Dossiers ouverts de l'agence {poste.agence}
+            </h2>
+            <Link to="/dossiers" className="text-sm font-medium text-cnps-600 hover:underline">
+              Voir tous les dossiers →
+            </Link>
+          </div>
+          <TableDossiers
+            dossiers={stats.agenceOuverts}
+            delaiCible={cible}
+            messageVide={`Aucun dossier ouvert dans l'agence ${poste.agence}.`}
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // ------------------------------------------------------------ TECHNICIEN --
   return (
     <div>
       {/* En-tête : identité du poste */}
@@ -146,7 +208,9 @@ export default function Accueil() {
           <h1 className="text-xl font-semibold text-gray-900">
             Bonjour{poste.agent ? ` ${poste.agent}` : ''}
           </h1>
-          <p className="text-sm text-gray-500">Votre activité et celle de votre agence, en un coup d'œil.</p>
+          <p className="text-sm text-gray-500">
+            Votre activité et celle de votre agence, en un coup d'œil.
+          </p>
         </div>
         <div className="flex flex-wrap items-end gap-3">
           <div>
@@ -198,7 +262,7 @@ export default function Accueil() {
             + Nouveau dossier
           </Link>
         </div>
-        <TableCompacte
+        <TableDossiers
           dossiers={stats.mesOuverts}
           delaiCible={cible}
           messageVide={`Aucun dossier ouvert pour ${poste.agent || 'ce technicien'} — bravo !`}
@@ -220,7 +284,7 @@ export default function Accueil() {
             Voir tous les dossiers →
           </Link>
         </div>
-        <TableCompacte
+        <TableDossiers
           dossiers={stats.agenceOuverts}
           delaiCible={cible}
           messageVide={`Aucun dossier ouvert dans l'agence ${poste.agence}.`}

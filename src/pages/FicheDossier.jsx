@@ -177,7 +177,14 @@ export default function FicheDossier() {
         <h2 className="mb-3 text-sm font-semibold text-gray-800">Informations</h2>
         <dl className="grid grid-cols-2 gap-x-4 gap-y-3 sm:grid-cols-3">
           <Info libelle="Matricule">
-            <span className="font-mono">{dossier.matricule}</span>
+            {/* Lien vers la fiche matricule (tous les dossiers de ce tiers) */}
+            <Link
+              to={`/matricules/${encodeURIComponent(dossier.matricule)}`}
+              title={`Voir la fiche du matricule ${dossier.matricule}`}
+              className="font-mono text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
+            >
+              {dossier.matricule}
+            </Link>
           </Info>
           <Info libelle="Motif">{dossier.motif}</Info>
           <Info libelle="Canal">{dossier.canal}</Info>

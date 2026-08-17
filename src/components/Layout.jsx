@@ -3,6 +3,7 @@
 // ---------------------------------------------------------------------------
 
 import { NavLink } from 'react-router-dom'
+import { libelleRole } from '../lib/auth.js'
 
 const LIENS = [
   { to: '/accueil', label: 'Accueil' },
@@ -57,13 +58,19 @@ export default function Layout({ children, onDeconnexion }) {
               </NavLink>
             ))}
           </nav>
-          <button
-            type="button"
-            onClick={onDeconnexion}
-            className="ml-auto rounded-md border border-cnps-400 px-3 py-1.5 text-sm text-cnps-100 transition-colors hover:bg-cnps-600 hover:text-white"
-          >
-            Se déconnecter
-          </button>
+          <div className="ml-auto flex items-center gap-3">
+            {/* Profil de la session de démonstration */}
+            <span className="hidden text-xs text-cnps-100 sm:inline">
+              Profil : {libelleRole()}
+            </span>
+            <button
+              type="button"
+              onClick={onDeconnexion}
+              className="rounded-md border border-cnps-400 px-3 py-1.5 text-sm text-cnps-100 transition-colors hover:bg-cnps-600 hover:text-white"
+            >
+              Se déconnecter
+            </button>
+          </div>
         </div>
       </header>
 

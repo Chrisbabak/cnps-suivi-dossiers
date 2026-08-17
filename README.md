@@ -17,10 +17,13 @@ Maquette web de **préfiguration CRM** pour le suivi des demandes et réclamatio
 
 ## Connexion (démo)
 
-L'application s'ouvre sur une page de connexion. Compte de démonstration :
+L'application s'ouvre sur une page de connexion. Deux comptes de démonstration,
+avec des vues d'accueil différentes selon le profil :
 
-- Identifiant : `User`
-- Mot de passe : `User2026`
+| Profil | Identifiant | Mot de passe | Vue d'accueil |
+| --- | --- | --- | --- |
+| Technicien | `User` | `User2026` | ses dossiers, puis ceux de son agence |
+| Chef d'agence | `Chef` | `Chef2026` | indicateurs de l'agence, charge par agent, dossiers ouverts |
 
 > ⚠️ Cette authentification est purement **cosmétique** (vérifiée dans le navigateur,
 > sans serveur) : elle donne l'expérience d'un espace connecté pour la maquette mais ne

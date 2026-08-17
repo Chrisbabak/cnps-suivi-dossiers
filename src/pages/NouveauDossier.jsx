@@ -4,7 +4,7 @@
 // ---------------------------------------------------------------------------
 
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import { CANAUX, TYPES, MOTIFS, PRIORITES } from '../lib/constants.js'
 import { aujourdhuiIso } from '../lib/dates.js'
@@ -32,13 +32,15 @@ const CLASSE_CHAMP =
 
 export default function NouveauDossier() {
   const { creerDossier, settings } = useData()
+  // Matricule pré-rempli quand on vient de la fiche matricule (?matricule=…).
+  const [parametres] = useSearchParams()
 
   // Valeurs initiales du formulaire (réutilisées après chaque enregistrement).
   const formulaireVide = () => ({
     type: 'Demande',
     canal: 'Agence',
     motif: MOTIFS[0],
-    matricule: '',
+    matricule: parametres.get('matricule') || '',
     agence: settings.agences[0] || '',
     agent: settings.agents[0] || '',
     priorite: 'Normale',
