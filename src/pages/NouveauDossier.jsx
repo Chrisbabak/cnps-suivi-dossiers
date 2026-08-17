@@ -3,11 +3,11 @@
 // ou d'une réclamation. Le numéro de dossier est généré automatiquement.
 // ---------------------------------------------------------------------------
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import { CANAUX, TYPES, MOTIFS, PRIORITES } from '../lib/constants.js'
-import { aujourdhuiIso } from '../lib/dates.js'
+import { aujourdhuiIso, delaiEnJours } from '../lib/dates.js'
 
 // Petit composant de champ avec libellé (accessibilité : label relié au champ).
 function Champ({ id, label, obligatoire = false, children }) {
@@ -31,7 +31,7 @@ const CLASSE_CHAMP =
   'w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500'
 
 export default function NouveauDossier() {
-  const { creerDossier, settings } = useData()
+  const { creerDossier, settings, dossiers } = useData()
   // Matricule pré-rempli quand on vient de la fiche matricule (?matricule=…).
   const [parametres] = useSearchParams()
 
@@ -52,6 +52,14 @@ export default function NouveauDossier() {
   const [confirmation, setConfirmation] = useState(null)
 
   const changer = (champ) => (e) => setForm({ ...form, [champ]: e.target.value })
+
+  // Alerte doublon (vision nationale) : dossiers NON clôturés déjà ouverts
+  // pour le matricule saisi, toutes agences confondues. Non bloquant.
+  const doublons = useMemo(() => {
+    const matricule = form.matricule.trim()
+    if (matricule.length < 3) return []
+    return dossiers.filter((d) => d.matricule === matricule && d.statut !== 'Clôturé')
+  }, [dossiers, form.matricule])
 
   const soumettre = (e) => {
     e.preventDefault()
@@ -115,6 +123,25 @@ export default function NouveauDossier() {
               placeholder="Ex. 115004782 ou E-045210"
               className={CLASSE_CHAMP}
             />
+            {doublons.length > 0 && (
+              <div
+                role="status"
+                className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900"
+              >
+                <p className="font-semibold">
+                  ⚠️ Cet assuré a déjà {doublons.length} dossier{doublons.length > 1 ? 's' : ''} en
+                  cours :
+                </p>
+                <ul className="mt-1 space-y-0.5">
+                  {doublons.map((d) => (
+                    <li key={d.id}>
+                      <span className="font-mono">{d.numero}</span> — {d.motif} — {d.agence} —{' '}
+                      {d.statut} ({delaiEnJours(d)} j)
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </Champ>
 
           <Champ id="agence" label="Agence">

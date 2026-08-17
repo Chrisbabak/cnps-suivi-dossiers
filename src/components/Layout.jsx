@@ -1,19 +1,24 @@
 // ---------------------------------------------------------------------------
-// Habillage général : en-tête institutionnel, navigation, pied de page.
+// Habillage général : en-tête institutionnel, navigation (limitée aux
+// écrans autorisés pour le rôle), profil de session, pied de page.
 // ---------------------------------------------------------------------------
 
 import { NavLink } from 'react-router-dom'
-import { libelleRole } from '../lib/auth.js'
+import { libelleSession } from '../lib/auth.js'
+import { canSee } from '../lib/permissions.js'
 
+// Onglets de navigation ; chaque entrée est liée à un écran des permissions.
 const LIENS = [
-  { to: '/accueil', label: 'Accueil' },
-  { to: '/dossiers', label: 'Dossiers' },
-  { to: '/nouveau', label: 'Nouveau dossier' },
-  { to: '/pilotage', label: 'Pilotage' },
-  { to: '/parametres', label: 'Paramètres' },
+  { to: '/accueil', label: 'Accueil', ecran: 'accueil' },
+  { to: '/dossiers', label: 'Dossiers', ecran: 'dossiers' },
+  { to: '/nouveau', label: 'Nouveau dossier', ecran: 'nouveau' },
+  { to: '/pilotage', label: 'Pilotage', ecran: 'pilotage' },
+  { to: '/parametres', label: 'Paramètres', ecran: 'parametres' },
 ]
 
-export default function Layout({ children, onDeconnexion }) {
+export default function Layout({ children, session, onDeconnexion }) {
+  const liensVisibles = LIENS.filter((lien) => canSee(lien.ecran, session?.role))
+
   return (
     <div className="flex min-h-screen flex-col bg-gray-100">
       <header className="bg-cnps-700 text-white shadow">
@@ -42,7 +47,7 @@ export default function Layout({ children, onDeconnexion }) {
             </div>
           </a>
           <nav aria-label="Navigation principale" className="flex flex-wrap gap-1">
-            {LIENS.map((lien) => (
+            {liensVisibles.map((lien) => (
               <NavLink
                 key={lien.to}
                 to={lien.to}
@@ -59,9 +64,9 @@ export default function Layout({ children, onDeconnexion }) {
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-3">
-            {/* Profil de la session de démonstration */}
+            {/* Profil de la session (rôle, nom, agence) */}
             <span className="hidden text-xs text-cnps-100 sm:inline">
-              Profil : {libelleRole()}
+              {libelleSession(session)}
             </span>
             <button
               type="button"

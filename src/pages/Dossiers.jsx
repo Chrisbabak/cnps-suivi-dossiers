@@ -8,6 +8,9 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import StatutSelect from '../components/StatutSelect.jsx'
+import ModaleHistoriqueAssure from '../components/ModaleHistoriqueAssure.jsx'
+import { getSession } from '../lib/auth.js'
+import { getDossierScope, canDeleteDossier, canReassignDossier } from '../lib/permissions.js'
 import { STATUTS, CANAUX, TYPES, MOTIFS } from '../lib/constants.js'
 import { formatDate, delaiEnJours, enDepassement } from '../lib/dates.js'
 import { telechargerCsv } from '../lib/csv.js'
@@ -18,16 +21,25 @@ const CLASSE_FILTRE =
   'rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-900 shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500'
 
 export default function Dossiers() {
-  const { dossiers, changerStatut, supprimerDossier, chargerDemo, settings } = useData()
+  const { dossiers, changerStatut, reaffecterAgent, supprimerDossier, chargerDemo, settings } =
+    useData()
   const navigate = useNavigate()
+
+  // Périmètre du rôle : agence verrouillée pour technicien et manager,
+  // suppression réservée à l'admin, réassignation depuis la liste pour le manager.
+  const session = getSession()
+  const scope = getDossierScope(session)
+  const peutSupprimer = canDeleteDossier(session?.role)
+  const peutReassigner = canReassignDossier(session?.role)
 
   const [recherche, setRecherche] = useState('')
   const [filtreType, setFiltreType] = useState('')
   const [filtreMotif, setFiltreMotif] = useState('')
   const [filtreStatut, setFiltreStatut] = useState('')
-  const [filtreAgence, setFiltreAgence] = useState('')
+  const [filtreAgence, setFiltreAgence] = useState(scope.agence || '')
   const [filtreCanal, setFiltreCanal] = useState('')
   const [triRecent, setTriRecent] = useState(true) // true = plus récents d'abord
+  const [matriculeOuvert, setMatriculeOuvert] = useState(null)
 
   // Liste filtrée et triée (recalculée à chaque changement de données/filtres).
   const affiches = useMemo(() => {
@@ -151,11 +163,14 @@ export default function Dossiers() {
           <label htmlFor="filtre-agence" className="mb-1 block text-xs font-medium text-gray-500">
             Agence
           </label>
+          {/* Technicien / manager : filtre verrouillé sur leur agence */}
           <select
             id="filtre-agence"
             value={filtreAgence}
             onChange={(e) => setFiltreAgence(e.target.value)}
-            className={CLASSE_FILTRE}
+            disabled={Boolean(scope.agence)}
+            title={scope.agence ? `Périmètre limité à l'agence ${scope.agence}` : undefined}
+            className={`${CLASSE_FILTRE} disabled:cursor-not-allowed disabled:bg-gray-100 disabled:text-gray-500`}
           >
             <option value="">Toutes</option>
             {settings.agences.map((a) => (
@@ -290,19 +305,42 @@ export default function Dossiers() {
                         {d.motif}
                       </td>
                       <td className="whitespace-nowrap px-3 py-2">
-                        {/* Lien vers la fiche matricule (vue 360° assuré/employeur) */}
-                        <Link
-                          to={`/matricules/${encodeURIComponent(d.matricule)}`}
-                          onClick={(e) => e.stopPropagation()}
-                          title={`Voir la fiche du matricule ${d.matricule}`}
+                        {/* Ouvre l'historique national de l'assuré (toutes agences) */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setMatriculeOuvert(d.matricule)
+                          }}
+                          title={`Historique de l'assuré ${d.matricule}`}
                           className="font-mono text-xs text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
                         >
                           {d.matricule}
-                        </Link>
+                        </button>
                       </td>
                       <td className="whitespace-nowrap px-3 py-2 text-gray-600">{d.canal}</td>
                       <td className="whitespace-nowrap px-3 py-2 text-gray-600">{d.agence}</td>
-                      <td className="whitespace-nowrap px-3 py-2 text-gray-600">{d.agent}</td>
+                      {/* Manager : réassignation directe du dossier à un autre agent */}
+                      <td
+                        className="whitespace-nowrap px-3 py-2 text-gray-600"
+                        onClick={peutReassigner ? (e) => e.stopPropagation() : undefined}
+                      >
+                        {peutReassigner ? (
+                          <select
+                            value={d.agent}
+                            onChange={(e) => reaffecterAgent(d, e.target.value)}
+                            aria-label={`Réassigner le dossier ${d.numero}`}
+                            className="w-full min-w-[8rem] cursor-pointer rounded-md border border-gray-300 bg-white px-2 py-1 text-xs focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
+                          >
+                            {!settings.agents.includes(d.agent) && <option>{d.agent}</option>}
+                            {settings.agents.map((a) => (
+                              <option key={a}>{a}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          d.agent
+                        )}
+                      </td>
                       {/* stopPropagation : changer le statut ne doit pas ouvrir la fiche */}
                       <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
                         <StatutSelect dossier={d} onChange={changerStatut} />
@@ -320,17 +358,20 @@ export default function Dossiers() {
                         {delai} j{depasse && <span aria-hidden="true"> ⚠</span>}
                       </td>
                       <td className="whitespace-nowrap px-3 py-2 text-right">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            supprimer(d)
-                          }}
-                          aria-label={`Supprimer le dossier ${d.numero}`}
-                          className="rounded px-1.5 py-0.5 text-xs text-gray-400 hover:bg-red-50 hover:text-red-600"
-                        >
-                          Suppr.
-                        </button>
+                        {/* Suppression réservée à l'admin */}
+                        {peutSupprimer && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              supprimer(d)
+                            }}
+                            aria-label={`Supprimer le dossier ${d.numero}`}
+                            className="rounded px-1.5 py-0.5 text-xs text-gray-400 hover:bg-red-50 hover:text-red-600"
+                          >
+                            Suppr.
+                          </button>
+                        )}
                       </td>
                     </tr>
                   )
@@ -344,6 +385,12 @@ export default function Dossiers() {
             le délai cible ({settings.delaiCible} jours).
           </p>
         </div>
+      )}
+      {matriculeOuvert && (
+        <ModaleHistoriqueAssure
+          matricule={matriculeOuvert}
+          onFermer={() => setMatriculeOuvert(null)}
+        />
       )}
     </div>
   )

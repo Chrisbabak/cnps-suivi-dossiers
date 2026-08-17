@@ -7,6 +7,8 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
+import { getSession } from '../lib/auth.js'
+import { getDossierScope } from '../lib/permissions.js'
 import { delaiEnJours } from '../lib/dates.js'
 import { STATUTS, CANAUX, REGION_PAR_AGENCE } from '../lib/constants.js'
 import { PALETTE_CNPS, COULEURS_STATUT } from '../lib/couleurs.js'
@@ -309,7 +311,15 @@ function compterPar(dossiers, champ) {
 // --- Page ---------------------------------------------------------------------
 
 export default function Pilotage() {
-  const { dossiers, settings } = useData()
+  const { dossiers: tousLesDossiers, settings } = useData()
+
+  // Manager : pilotage limité à son agence ; admin : national.
+  const scope = getDossierScope(getSession())
+  const dossiers = useMemo(
+    () =>
+      scope.agence ? tousLesDossiers.filter((d) => d.agence === scope.agence) : tousLesDossiers,
+    [tousLesDossiers, scope.agence],
+  )
 
   const stats = useMemo(() => {
     const cible = settings.delaiCible
@@ -371,7 +381,9 @@ export default function Pilotage() {
 
   return (
     <div>
-      <h1 className="mb-4 text-xl font-semibold text-gray-900">Pilotage</h1>
+      <h1 className="mb-4 text-xl font-semibold text-gray-900">
+        Pilotage{scope.agence ? ` — Agence ${scope.agence}` : ' national'}
+      </h1>
 
       {/* Indicateurs clés (liserés aux couleurs de la charte CNPS) */}
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">

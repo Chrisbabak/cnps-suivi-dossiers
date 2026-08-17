@@ -1,14 +1,18 @@
 // ---------------------------------------------------------------------------
 // Tableau compact de dossiers, réutilisé par l'accueil et la fiche matricule.
-// Ligne cliquable → fiche dossier ; matricule cliquable → fiche matricule.
+// Ligne cliquable → fiche dossier ; matricule cliquable → modale
+// "Historique de l'assuré" (tous ses dossiers, toutes agences).
 // ---------------------------------------------------------------------------
 
-import { Link, useNavigate } from 'react-router-dom'
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { STYLES_STATUT } from './StatutSelect.jsx'
+import ModaleHistoriqueAssure from './ModaleHistoriqueAssure.jsx'
 import { formatDate, delaiEnJours, enDepassement } from '../lib/dates.js'
 
 export default function TableDossiers({ dossiers, delaiCible, messageVide }) {
   const navigate = useNavigate()
+  const [matriculeOuvert, setMatriculeOuvert] = useState(null)
 
   if (dossiers.length === 0) {
     return <p className="px-4 py-6 text-center text-sm text-gray-400">{messageVide}</p>
@@ -56,15 +60,18 @@ export default function TableDossiers({ dossiers, delaiCible, messageVide }) {
                 <td className="whitespace-nowrap px-3 py-2 text-gray-600">{d.type}</td>
                 <td className="px-3 py-2 text-gray-800">{d.motif}</td>
                 <td className="whitespace-nowrap px-3 py-2">
-                  {/* Lien vers la fiche matricule (vue 360° de l'assuré/employeur) */}
-                  <Link
-                    to={`/matricules/${encodeURIComponent(d.matricule)}`}
-                    onClick={(e) => e.stopPropagation()}
-                    title={`Voir la fiche du matricule ${d.matricule}`}
+                  {/* Ouvre l'historique national de l'assuré (toutes agences) */}
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setMatriculeOuvert(d.matricule)
+                    }}
+                    title={`Historique de l'assuré ${d.matricule}`}
                     className="font-mono text-xs text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
                   >
                     {d.matricule}
-                  </Link>
+                  </button>
                 </td>
                 <td className="whitespace-nowrap px-3 py-2 text-gray-600">{d.agent}</td>
                 <td className="whitespace-nowrap px-3 py-2">
@@ -88,6 +95,12 @@ export default function TableDossiers({ dossiers, delaiCible, messageVide }) {
           })}
         </tbody>
       </table>
+      {matriculeOuvert && (
+        <ModaleHistoriqueAssure
+          matricule={matriculeOuvert}
+          onFermer={() => setMatriculeOuvert(null)}
+        />
+      )}
     </div>
   )
 }

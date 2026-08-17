@@ -1,13 +1,15 @@
 // ---------------------------------------------------------------------------
-// Racine de l'application : connexion (démo), routage + fournisseur de données.
-// Tant que l'utilisateur n'est pas connecté, la page de connexion couvre
-// toutes les URL ; après connexion, l'URL demandée s'affiche directement.
+// Racine de l'application : session par rôle (POC), routage + données.
+// Tant qu'aucune session n'est ouverte, le sélecteur de profil couvre
+// toutes les URL. Chaque route est gardée : l'accès direct par URL à un
+// écran interdit pour le rôle redirige vers l'accueil.
 // ---------------------------------------------------------------------------
 
 import { useState } from 'react'
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { DataProvider } from './context/DataContext.jsx'
-import { estConnecte, fermerSession } from './lib/auth.js'
+import { getSession, fermerSession } from './lib/auth.js'
+import { canSee } from './lib/permissions.js'
 import Layout from './components/Layout.jsx'
 import Accueil from './pages/Accueil.jsx'
 import Connexion from './pages/Connexion.jsx'
@@ -22,29 +24,36 @@ import Parametres from './pages/Parametres.jsx'
 const BASE_ROUTEUR = import.meta.env.BASE_URL.replace(/\/$/, '')
 
 export default function App() {
-  const [connecte, setConnecte] = useState(estConnecte)
+  const [session, setSession] = useState(getSession)
 
   const deconnexion = () => {
     fermerSession()
-    setConnecte(false)
+    setSession(null)
   }
+
+  // Garde de route : écran non autorisé pour le rôle → retour à l'accueil.
+  const garder = (ecran, element) =>
+    canSee(ecran, session?.role) ? element : <Navigate to="/accueil" replace />
 
   return (
     <BrowserRouter basename={BASE_ROUTEUR}>
       <DataProvider>
-        {!connecte ? (
-          <Connexion onConnexion={() => setConnecte(true)} />
+        {!session ? (
+          <Connexion onConnexion={() => setSession(getSession())} />
         ) : (
-          <Layout onDeconnexion={deconnexion}>
+          <Layout session={session} onDeconnexion={deconnexion}>
             <Routes>
               <Route path="/" element={<Navigate to="/accueil" replace />} />
               <Route path="/accueil" element={<Accueil />} />
-              <Route path="/dossiers" element={<Dossiers />} />
-              <Route path="/dossiers/:id" element={<FicheDossier />} />
-              <Route path="/matricules/:matricule" element={<FicheMatricule />} />
-              <Route path="/nouveau" element={<NouveauDossier />} />
-              <Route path="/pilotage" element={<Pilotage />} />
-              <Route path="/parametres" element={<Parametres />} />
+              <Route path="/dossiers" element={garder('dossiers', <Dossiers />)} />
+              <Route path="/dossiers/:id" element={garder('dossiers', <FicheDossier />)} />
+              <Route
+                path="/matricules/:matricule"
+                element={garder('dossiers', <FicheMatricule />)}
+              />
+              <Route path="/nouveau" element={garder('nouveau', <NouveauDossier />)} />
+              <Route path="/pilotage" element={garder('pilotage', <Pilotage />)} />
+              <Route path="/parametres" element={garder('parametres', <Parametres />)} />
               {/* Route inconnue : retour à l'accueil */}
               <Route path="*" element={<Navigate to="/accueil" replace />} />
             </Routes>

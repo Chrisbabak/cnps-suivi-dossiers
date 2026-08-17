@@ -1,22 +1,17 @@
 // ---------------------------------------------------------------------------
-// Page "Accueil" : tableau de bord adapté au profil connecté.
-// - Technicien : ses dossiers ouverts, puis ceux de son agence.
-// - Chef d'agence : indicateurs de l'agence, charge par agent, dossiers ouverts.
-// Le technicien et l'agence sont choisis via des sélecteurs, mémorisés
-// sur le poste (dans le vrai CRM, l'identité viendra du compte de l'agent).
+// Page "Accueil" : tableau de bord adapté au rôle de la session.
+// - Technicien : ses dossiers (agent = lui) + dossiers ouverts de son agence
+// - Manager    : tous les dossiers de son agence + compteurs agence
+// - Admin      : vue toutes agences (compteurs globaux)
+// L'identité (rôle, agence, nom) vient de la session choisie à la connexion.
 // ---------------------------------------------------------------------------
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import TableDossiers from '../components/TableDossiers.jsx'
-import { getRole } from '../lib/auth.js'
-import { delaiEnJours, enDepassement } from '../lib/dates.js'
-
-const CLE_POSTE = 'cnps-poste-v1' // choix technicien/agence propre à ce poste
-
-const CLASSE_SELECT =
-  'rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-900 shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500'
+import { getSession } from '../lib/auth.js'
+import { enDepassement } from '../lib/dates.js'
 
 // Carte indicateur compacte.
 function Indicateur({ libelle, valeur, detail, alerte = false }) {
@@ -35,8 +30,8 @@ function Indicateur({ libelle, valeur, detail, alerte = false }) {
   )
 }
 
-// Barres horizontales de charge par agent (dossiers ouverts).
-function ChargeParAgent({ donnees }) {
+// Barres horizontales simples (charge par agent, ouverts par agence…).
+function Barres({ donnees, uniteAria }) {
   const max = Math.max(...donnees.map((d) => d.valeur), 1)
   return (
     <ul className="space-y-2">
@@ -49,7 +44,7 @@ function ChargeParAgent({ donnees }) {
           <div
             className="h-2.5 w-full overflow-hidden rounded-full bg-gray-100"
             role="img"
-            aria-label={`${label} : ${valeur} dossier(s) ouvert(s)`}
+            aria-label={`${label} : ${valeur} ${uniteAria}`}
           >
             <div
               className="h-full rounded-full"
@@ -71,119 +66,128 @@ function trierParPriorite(dossiers, delaiCible) {
   })
 }
 
+// Compte les dossiers ouverts par valeur d'un champ (barres).
+function compterOuvertsPar(dossiersOuverts, champ) {
+  const compteur = new Map()
+  for (const d of dossiersOuverts) compteur.set(d[champ], (compteur.get(d[champ]) || 0) + 1)
+  return [...compteur.entries()]
+    .map(([label, valeur]) => ({ label, valeur }))
+    .sort((a, b) => b.valeur - a.valeur)
+}
+
 export default function Accueil() {
   const { dossiers, settings } = useData()
-  const role = getRole()
-
-  // Technicien + agence du poste, mémorisés dans le navigateur.
-  const [poste, setPoste] = useState(() => {
-    try {
-      const brut = JSON.parse(localStorage.getItem(CLE_POSTE) || '{}')
-      return {
-        agent: settings.agents.includes(brut.agent) ? brut.agent : settings.agents[0] || '',
-        agence: settings.agences.includes(brut.agence) ? brut.agence : settings.agences[0] || '',
-      }
-    } catch {
-      return { agent: settings.agents[0] || '', agence: settings.agences[0] || '' }
-    }
-  })
-
-  useEffect(() => {
-    localStorage.setItem(CLE_POSTE, JSON.stringify(poste))
-  }, [poste])
-
+  const session = getSession()
   const cible = settings.delaiCible
 
   const stats = useMemo(() => {
-    const mesDossiers = dossiers.filter((d) => d.agent === poste.agent)
-    const mesOuverts = mesDossiers.filter((d) => d.statut !== 'Clôturé')
-    const agenceTous = dossiers.filter((d) => d.agence === poste.agence)
+    const ouverts = dossiers.filter((d) => d.statut !== 'Clôturé')
+    const agenceTous = session?.agence ? dossiers.filter((d) => d.agence === session.agence) : []
     const agenceOuverts = agenceTous.filter((d) => d.statut !== 'Clôturé')
-    const agenceClotures = agenceTous.filter((d) => d.statut === 'Clôturé')
-    const agenceDansDelais = agenceClotures.filter((d) => delaiEnJours(d) <= cible).length
-
-    // Charge par agent au sein de l'agence (vue chef).
-    const compteParAgent = new Map()
-    for (const d of agenceOuverts) {
-      compteParAgent.set(d.agent, (compteParAgent.get(d.agent) || 0) + 1)
-    }
+    const mesDossiers = session?.nom ? dossiers.filter((d) => d.agent === session.nom) : []
+    const mesOuverts = mesDossiers.filter((d) => d.statut !== 'Clôturé')
 
     return {
+      // Technicien
       mesOuverts: trierParPriorite(mesOuverts, cible),
       mesDepassements: mesOuverts.filter((d) => enDepassement(d, cible)).length,
       mesUrgents: mesOuverts.filter((d) => d.priorite === 'Urgente').length,
       mesClotures: mesDossiers.filter((d) => d.statut === 'Clôturé').length,
+      // Agence (technicien + manager)
       agenceOuverts: trierParPriorite(agenceOuverts, cible),
       agenceDepassements: agenceOuverts.filter((d) => enDepassement(d, cible)).length,
       agenceUrgents: agenceOuverts.filter((d) => d.priorite === 'Urgente').length,
-      agencePctDelais:
-        agenceClotures.length > 0
-          ? `${Math.round((100 * agenceDansDelais) / agenceClotures.length)} %`
-          : '—',
-      chargeParAgent: [...compteParAgent.entries()]
-        .map(([label, valeur]) => ({ label, valeur }))
-        .sort((a, b) => b.valeur - a.valeur),
+      agenceClotures: agenceTous.filter((d) => d.statut === 'Clôturé').length,
+      chargeParAgent: compterOuvertsPar(agenceOuverts, 'agent'),
+      // Admin (global)
+      totalGlobal: dossiers.length,
+      ouvertsGlobal: trierParPriorite(ouverts, cible),
+      depassementsGlobal: ouverts.filter((d) => enDepassement(d, cible)).length,
+      urgentsGlobal: ouverts.filter((d) => d.priorite === 'Urgente').length,
+      ouvertsParAgence: compterOuvertsPar(ouverts, 'agence'),
     }
-  }, [dossiers, poste, cible])
+  }, [dossiers, session, cible])
 
-  // ------------------------------------------------------------------ CHEF --
-  if (role === 'chef') {
+  // ----------------------------------------------------------------- ADMIN --
+  if (session?.role === 'admin') {
     return (
       <div>
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <div>
-            <h1 className="text-xl font-semibold text-gray-900">Bonjour</h1>
-            <p className="text-sm text-gray-500">
-              Vue chef d'agence — situation de l'agence {poste.agence}.
-            </p>
-          </div>
-          <div>
-            <label htmlFor="poste-agence" className="mb-1 block text-xs font-medium text-gray-500">
-              Agence
-            </label>
-            <select
-              id="poste-agence"
-              value={poste.agence}
-              onChange={(e) => setPoste({ ...poste, agence: e.target.value })}
-              className={CLASSE_SELECT}
-            >
-              {settings.agences.map((a) => (
-                <option key={a}>{a}</option>
-              ))}
-            </select>
-          </div>
+        <div className="mb-5">
+          <h1 className="text-xl font-semibold text-gray-900">Bonjour</h1>
+          <p className="text-sm text-gray-500">Vue Admin — situation nationale, toutes agences.</p>
         </div>
 
-        {/* Indicateurs de l'agence */}
+        <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Indicateur libelle="Dossiers au total" valeur={stats.totalGlobal} />
+          <Indicateur libelle="Ouverts" valeur={stats.ouvertsGlobal.length} />
+          <Indicateur libelle="En dépassement" valeur={stats.depassementsGlobal} alerte />
+          <Indicateur libelle="Urgents" valeur={stats.urgentsGlobal} alerte />
+        </div>
+
+        <div className="mb-4 rounded-lg bg-white p-4 shadow">
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="text-sm font-semibold text-gray-800">Dossiers ouverts par agence</h2>
+            <Link to="/pilotage" className="text-sm font-medium text-cnps-600 hover:underline">
+              Pilotage national →
+            </Link>
+          </div>
+          <Barres donnees={stats.ouvertsParAgence} uniteAria="dossier(s) ouvert(s)" />
+        </div>
+
+        <div className="overflow-hidden rounded-lg bg-white shadow">
+          <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
+            <h2 className="text-sm font-semibold text-gray-800">
+              Dossiers ouverts (toutes agences)
+            </h2>
+            <Link to="/dossiers" className="text-sm font-medium text-cnps-600 hover:underline">
+              Voir tous les dossiers →
+            </Link>
+          </div>
+          <TableDossiers
+            dossiers={stats.ouvertsGlobal}
+            delaiCible={cible}
+            messageVide="Aucun dossier ouvert."
+          />
+        </div>
+      </div>
+    )
+  }
+
+  // --------------------------------------------------------------- MANAGER --
+  if (session?.role === 'manager') {
+    return (
+      <div>
+        <div className="mb-5">
+          <h1 className="text-xl font-semibold text-gray-900">Bonjour</h1>
+          <p className="text-sm text-gray-500">
+            Vue Manager — situation de l'agence {session.agence}.
+          </p>
+        </div>
+
+        {/* Compteurs agence : ouverts, en dépassement, urgents, clôturés */}
         <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
           <Indicateur libelle="Dossiers ouverts" valeur={stats.agenceOuverts.length} />
           <Indicateur libelle="En dépassement" valeur={stats.agenceDepassements} alerte />
           <Indicateur libelle="Urgents" valeur={stats.agenceUrgents} alerte />
-          <Indicateur
-            libelle="Dans les délais"
-            valeur={stats.agencePctDelais}
-            detail={`clôturés · cible ${cible} j`}
-          />
+          <Indicateur libelle="Clôturés" valeur={stats.agenceClotures} />
         </div>
 
-        {/* Charge par agent */}
         <div className="mb-4 rounded-lg bg-white p-4 shadow">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="text-sm font-semibold text-gray-800">
               Charge par agent (dossiers ouverts de l'agence)
             </h2>
             <Link to="/pilotage" className="text-sm font-medium text-cnps-600 hover:underline">
-              Pilotage global →
+              Pilotage de l'agence →
             </Link>
           </div>
-          <ChargeParAgent donnees={stats.chargeParAgent} />
+          <Barres donnees={stats.chargeParAgent} uniteAria="dossier(s) ouvert(s)" />
         </div>
 
-        {/* Dossiers ouverts de l'agence */}
         <div className="overflow-hidden rounded-lg bg-white shadow">
           <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3">
             <h2 className="text-sm font-semibold text-gray-800">
-              Dossiers ouverts de l'agence {poste.agence}
+              Dossiers ouverts de l'agence {session.agence}
             </h2>
             <Link to="/dossiers" className="text-sm font-medium text-cnps-600 hover:underline">
               Voir tous les dossiers →
@@ -192,7 +196,7 @@ export default function Accueil() {
           <TableDossiers
             dossiers={stats.agenceOuverts}
             delaiCible={cible}
-            messageVide={`Aucun dossier ouvert dans l'agence ${poste.agence}.`}
+            messageVide={`Aucun dossier ouvert dans l'agence ${session.agence}.`}
           />
         </div>
       </div>
@@ -202,48 +206,13 @@ export default function Accueil() {
   // ------------------------------------------------------------ TECHNICIEN --
   return (
     <div>
-      {/* En-tête : identité du poste */}
-      <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold text-gray-900">
-            Bonjour{poste.agent ? ` ${poste.agent}` : ''}
-          </h1>
-          <p className="text-sm text-gray-500">
-            Votre activité et celle de votre agence, en un coup d'œil.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-end gap-3">
-          <div>
-            <label htmlFor="poste-agent" className="mb-1 block text-xs font-medium text-gray-500">
-              Technicien
-            </label>
-            <select
-              id="poste-agent"
-              value={poste.agent}
-              onChange={(e) => setPoste({ ...poste, agent: e.target.value })}
-              className={CLASSE_SELECT}
-            >
-              {settings.agents.map((a) => (
-                <option key={a}>{a}</option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor="poste-agence" className="mb-1 block text-xs font-medium text-gray-500">
-              Agence
-            </label>
-            <select
-              id="poste-agence"
-              value={poste.agence}
-              onChange={(e) => setPoste({ ...poste, agence: e.target.value })}
-              className={CLASSE_SELECT}
-            >
-              {settings.agences.map((a) => (
-                <option key={a}>{a}</option>
-              ))}
-            </select>
-          </div>
-        </div>
+      <div className="mb-5">
+        <h1 className="text-xl font-semibold text-gray-900">
+          Bonjour{session?.nom ? ` ${session.nom}` : ''}
+        </h1>
+        <p className="text-sm text-gray-500">
+          Votre activité et celle de l'agence {session?.agence}, en un coup d'œil.
+        </p>
       </div>
 
       {/* Indicateurs du technicien */}
@@ -265,15 +234,15 @@ export default function Accueil() {
         <TableDossiers
           dossiers={stats.mesOuverts}
           delaiCible={cible}
-          messageVide={`Aucun dossier ouvert pour ${poste.agent || 'ce technicien'} — bravo !`}
+          messageVide={`Aucun dossier ouvert pour ${session?.nom || 'ce technicien'} — bravo !`}
         />
       </div>
 
-      {/* Dossiers de l'agence */}
+      {/* Dossiers ouverts de l'agence (lecture) */}
       <div className="overflow-hidden rounded-lg bg-white shadow">
         <div className="flex flex-wrap items-center justify-between gap-2 border-b border-gray-100 px-4 py-3">
           <h2 className="text-sm font-semibold text-gray-800">
-            Dossiers ouverts de l'agence {poste.agence}
+            Dossiers ouverts de l'agence {session?.agence}
             {stats.agenceDepassements > 0 && (
               <span className="ml-2 rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700">
                 {stats.agenceDepassements} en dépassement
@@ -287,7 +256,7 @@ export default function Accueil() {
         <TableDossiers
           dossiers={stats.agenceOuverts}
           delaiCible={cible}
-          messageVide={`Aucun dossier ouvert dans l'agence ${poste.agence}.`}
+          messageVide={`Aucun dossier ouvert dans l'agence ${session?.agence}.`}
         />
       </div>
     </div>

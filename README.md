@@ -15,19 +15,32 @@ Maquette web de **préfiguration CRM** pour le suivi des demandes et réclamatio
 - [Tailwind CSS](https://tailwindcss.com/)
 - Aucun backend, aucun appel réseau, aucun cookie, aucun outil d'analytics
 
-## Connexion (démo)
+## Rôles et périmètres
 
-L'application s'ouvre sur une page de connexion. Deux comptes de démonstration,
-avec des vues d'accueil différentes selon le profil :
+L'application s'ouvre sur un **sélecteur de profil** (POC : pas de mot de passe ni de
+comptes). La session `{ role, agence, nom }` est stockée en localStorage (clé `session`)
+et survit au rechargement ; « Se déconnecter » renvoie au sélecteur.
 
-| Profil | Identifiant | Mot de passe | Vue d'accueil |
+| | Technicien | Manager | Admin |
 | --- | --- | --- | --- |
-| Technicien | `User` | `User2026` | ses dossiers, puis ceux de son agence |
-| Chef d'agence | `Chef` | `Chef2026` | indicateurs de l'agence, charge par agent, dossiers ouverts |
+| À la connexion | agence + nom | agence | — |
+| Accueil | ses dossiers + agence (lecture) | dossiers et compteurs de l'agence | compteurs globaux, toutes agences |
+| Dossiers | agence **verrouillée** | agence **verrouillée** + **réassignation** d'agent | toutes agences |
+| Supprimer un dossier | non | non | oui |
+| Pilotage | masqué | limité à son agence | national |
+| Paramètres | masqué | masqué | visible |
 
-> ⚠️ Cette authentification est purement **cosmétique** (vérifiée dans le navigateur,
-> sans serveur) : elle donne l'expérience d'un espace connecté pour la maquette mais ne
-> protège pas réellement les données. Le vrai CRM aura une authentification serveur.
+La logique de périmètre est centralisée dans [src/lib/permissions.js](src/lib/permissions.js)
+(`canSee`, `getDossierScope`, `canDeleteDossier`, `canReassignDossier`) ; les routes sont
+gardées (accès direct par URL à un écran interdit → redirection vers l'accueil).
+
+**Vision assuré nationale** (quel que soit le rôle) : cliquer un matricule dans un tableau
+ouvre une modale « Historique de l'assuré » listant ses dossiers de **toutes** les agences ;
+à la création d'un dossier, une **alerte doublon** (non bloquante) signale les dossiers en
+cours existants pour le matricule saisi.
+
+> ⚠️ Ce contrôle d'accès est purement **cosmétique** (vérifié dans le navigateur, sans
+> serveur) : il préfigure les rôles du futur CRM mais ne protège pas réellement les données.
 
 ## Lancement en local
 
