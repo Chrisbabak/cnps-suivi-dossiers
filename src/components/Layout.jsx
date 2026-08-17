@@ -5,6 +5,7 @@
 import { NavLink } from 'react-router-dom'
 
 const LIENS = [
+  { to: '/accueil', label: 'Accueil' },
   { to: '/dossiers', label: 'Dossiers' },
   { to: '/nouveau', label: 'Nouveau dossier' },
   { to: '/pilotage', label: 'Pilotage' },

@@ -20,7 +20,7 @@ export default function Connexion({ onConnexion }) {
     e.preventDefault()
     if (verifierIdentifiants(identifiant, motDePasse)) {
       ouvrirSession()
-      navigate('/dossiers', { replace: true }) // atterrissage : page Dossiers
+      navigate('/accueil', { replace: true }) // atterrissage : tableau de bord du technicien
       onConnexion()
     } else {
       setErreur('Identifiant ou mot de passe incorrect.')

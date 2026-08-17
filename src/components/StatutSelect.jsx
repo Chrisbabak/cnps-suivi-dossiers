@@ -5,7 +5,8 @@
 import { STATUTS } from '../lib/constants.js'
 
 // Couleurs associées à chaque statut (badge + sélecteur).
-const STYLES_STATUT = {
+// Exporté pour être réutilisé en badge statique (page Accueil).
+export const STYLES_STATUT = {
   Nouveau: 'bg-blue-100 text-blue-900 border-blue-300',
   'En cours': 'bg-amber-100 text-amber-900 border-amber-300',
   'En attente pièces': 'bg-purple-100 text-purple-900 border-purple-300',
