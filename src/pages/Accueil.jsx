@@ -144,7 +144,7 @@ export default function Accueil() {
       <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-xl font-semibold text-gray-900">
-            Bonjour{poste.agent ? ` ${poste.agent}` : ''} 👋
+            Bonjour{poste.agent ? ` ${poste.agent}` : ''}
           </h1>
           <p className="text-sm text-gray-500">Votre activité et celle de votre agence, en un coup d'œil.</p>
         </div>
