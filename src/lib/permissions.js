@@ -9,12 +9,6 @@
 //  admin      | + paramètres                             | toutes agences, suppression
 // ---------------------------------------------------------------------------
 
-export const ROLES = [
-  { valeur: 'technicien', libelle: 'Technicien' },
-  { valeur: 'manager', libelle: 'Manager' },
-  { valeur: 'admin', libelle: 'Admin' },
-]
-
 // Écrans accessibles par rôle (utilisé par la navigation ET les gardes de route).
 const ECRANS_PAR_ROLE = {
   technicien: ['accueil', 'dossiers', 'nouveau'],

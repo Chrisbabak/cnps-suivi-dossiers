@@ -17,16 +17,24 @@ Maquette web de **préfiguration CRM** pour le suivi des demandes et réclamatio
 
 ## Rôles et périmètres
 
-L'application s'ouvre sur un **sélecteur de profil** (POC : pas de mot de passe ni de
-comptes). On choisit une **personne dans l'annuaire** — techniciens et managers sont
-rattachés à une agence ([src/lib/annuaire.js](src/lib/annuaire.js), listes éditables dans
-Paramètres) — et **l'agence est déduite automatiquement**. La session `{ role, agence, nom }`
-est stockée en localStorage (clé `session`) et survit au rechargement ; « Se déconnecter »
-renvoie au sélecteur. Le futur système de comptes n'aura qu'à alimenter cet annuaire.
+L'application s'ouvre sur un écran de connexion. Trois comptes de démonstration :
+
+| Compte | Identifiant | Mot de passe | Personne | Agence (retrouvée dans l'annuaire) |
+| --- | --- | --- | --- | --- |
+| Technicien | `technicien` | `Tech2026` | S. Traoré | Yopougon |
+| Manager | `manager` | `Manager2026` | M. Koffi | Yopougon |
+| Admin | `admin` | `Admin2026` | | toutes agences |
+
+Chaque compte désigne une personne de l'annuaire. Techniciens et managers y sont rattachés
+à une agence ([src/lib/annuaire.js](src/lib/annuaire.js), listes éditables dans Paramètres),
+et **l'agence est retrouvée automatiquement** à la connexion : elle n'est jamais saisie.
+La session `{ role, agence, nom }` est stockée en localStorage (clé `session`) et survit au
+rechargement ; « Se déconnecter » renvoie à l'écran de connexion. Le futur système de comptes
+n'aura qu'à remplacer la liste des comptes de [src/lib/auth.js](src/lib/auth.js) et alimenter
+l'annuaire.
 
 | | Technicien | Manager | Admin |
 | --- | --- | --- | --- |
-| À la connexion | nom (agence déduite) | nom (agence déduite) | — |
 | Accueil | ses dossiers + agence (lecture) | dossiers et compteurs de l'agence | compteurs globaux, toutes agences |
 | Dossiers | agence **verrouillée** | agence **verrouillée** + **réassignation** (techniciens de son agence) | toutes agences |
 | Supprimer un dossier | non | non | oui |
