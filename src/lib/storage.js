@@ -11,10 +11,12 @@
 import { dossiersVersCsv } from './csv.js'
 import { DEFAULT_SETTINGS } from './constants.js'
 
-// v6 : annuaire utilisateurs (agents et managers rattachés à une agence).
+// v7 : rafraîchissement de l'environnement de démo (les dates des dossiers
+// fictifs sont relatives au jour du chargement — changer de version force
+// chaque navigateur à recharger une démo aux dates du jour).
 // Un changement de version repart d'un état neuf — les données de démo
 // sont rechargées automatiquement au lancement suivant.
-const STORAGE_KEY = 'cnps-suivi-dossiers-v6'
+const STORAGE_KEY = 'cnps-suivi-dossiers-v7'
 
 // Lit l'état complet { dossiers, settings } avec valeurs par défaut.
 function lireEtat() {

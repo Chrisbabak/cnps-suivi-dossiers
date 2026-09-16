@@ -61,6 +61,7 @@ export const DEFAULT_SETTINGS = {
     { nom: 'A. Kouassi', agence: 'Plateau' },
     { nom: 'M. Diabaté', agence: 'Plateau' },
     { nom: 'S. Traoré', agence: 'Yopougon' },
+    { nom: 'N. Brou', agence: 'Yopougon' },
     { nom: "F. N'Guessan", agence: 'Bouaké' },
     { nom: 'B. Koné', agence: 'Cocody' },
     { nom: 'R. Aka', agence: 'San Pedro' },
