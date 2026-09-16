@@ -98,7 +98,7 @@ export default function Connexion({ onConnexion }) {
                   >
                     {settings.agents.map((a) => (
                       <option key={a.nom} value={a.nom}>
-                        {a.nom} — {a.agence}
+                        {a.nom}
                       </option>
                     ))}
                   </select>
@@ -118,7 +118,7 @@ export default function Connexion({ onConnexion }) {
                   >
                     {settings.managers.map((m) => (
                       <option key={m.nom} value={m.nom}>
-                        {m.nom} — {m.agence}
+                        {m.nom}
                       </option>
                     ))}
                   </select>
