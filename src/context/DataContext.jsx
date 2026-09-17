@@ -11,6 +11,7 @@ import { prochainNumero, genererId } from '../lib/numero.js'
 import { creerDossiersDemo } from '../lib/demo.js'
 import { csvVersDossiers } from '../lib/csv.js'
 import { aujourdhuiIso } from '../lib/dates.js'
+import { NOTE_INTERNE } from '../lib/constants.js'
 
 const DataContext = createContext(null)
 
@@ -42,7 +43,7 @@ export function DataProvider({ children }) {
   const evenement = (type, texte, agent = null) => ({
     id: genererId(),
     date: new Date().toISOString(),
-    type, // 'creation' | 'statut' | 'affectation' | 'priorite' | 'note'
+    type, // 'creation' | 'statut' | 'affectation' | 'priorite' | 'interaction' | 'note'
     texte,
     agent,
   })
@@ -56,7 +57,7 @@ export function DataProvider({ children }) {
       statut: 'Nouveau',
       dateCloture: null,
       ...champs,
-      historique: [evenement('creation', `Dossier créé (canal ${champs.canal})`, champs.agent)],
+      historique: [evenement('creation', `Dossier ouvert (canal ${champs.canal})`, champs.agent)],
     }
     storage.save(dossier)
     rafraichir()
@@ -82,9 +83,14 @@ export function DataProvider({ children }) {
     majAvecEvenement(dossier, champs, evenement('statut', `Statut modifié : ${dossier.statut} → ${statut}`))
   }
 
-  // Ajoute une note libre au journal du dossier.
-  const ajouterNote = (dossier, texte, agent) => {
-    majAvecEvenement(dossier, {}, evenement('note', texte, agent))
+  // Consigne un échange avec l'assuré (canal = appel, visite, email…) ou,
+  // pour une note interne, un simple commentaire d'agent.
+  const ajouterInteraction = (dossier, { canal, texte, agent }) => {
+    const evt =
+      canal === NOTE_INTERNE
+        ? evenement('note', texte, agent)
+        : { ...evenement('interaction', texte, agent), canal }
+    majAvecEvenement(dossier, {}, evt)
   }
 
   // Réaffecte le dossier à un autre agent.
@@ -104,7 +110,7 @@ export function DataProvider({ children }) {
     rafraichir()
   }
 
-  // Charge les 12 dossiers de démonstration (numéros attribués à la suite).
+  // Charge les dossiers de démonstration (numéros attribués à la suite).
   const chargerDemo = () => {
     const demo = creerDossiersDemo()
     const tous = [...storage.getAll()]
@@ -145,7 +151,7 @@ export function DataProvider({ children }) {
     creerDossier,
     majDossier,
     changerStatut,
-    ajouterNote,
+    ajouterInteraction,
     reaffecterAgent,
     changerPriorite,
     supprimerDossier,

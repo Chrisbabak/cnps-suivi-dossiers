@@ -24,6 +24,18 @@ export const STATUTS = ['Nouveau', 'En cours', 'En attente pièces', 'Validé', 
 
 export const PRIORITES = ['Normale', 'Urgente']
 
+// Échanges avec l'assuré ou l'employeur, consignés dans le journal d'un dossier.
+// "Note interne" n'est pas un échange : elle reste visible des seuls agents.
+export const CANAUX_INTERACTION = [
+  'Appel entrant',
+  'Appel sortant',
+  'Visite en agence',
+  'Email',
+  'Courrier',
+  'WhatsApp',
+]
+export const NOTE_INTERNE = 'Note interne'
+
 // Les 18 agences CNPS et leur région de rattachement.
 export const AGENCES = [
   { region: 'Abidjan', nom: 'Plateau' },

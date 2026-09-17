@@ -83,7 +83,7 @@ export default function Layout({ children, session, onDeconnexion }) {
 
       <footer className="border-t border-gray-200 bg-white">
         <p className="mx-auto max-w-7xl px-4 py-3 text-center text-xs text-gray-500 sm:px-6">
-          Maquette CRM — données de démonstration · Réalisé par{' '}
+          Maquette CRM, données de démonstration · Réalisé par{' '}
           <a
             href="https://declick.co"
             target="_blank"

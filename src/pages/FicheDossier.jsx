@@ -1,25 +1,22 @@
 // ---------------------------------------------------------------------------
 // Page "Fiche dossier" : vue détaillée d'un dossier avec chemin de fer
-// (avancement du traitement), informations, réaffectation, et journal
-// des notes & interactions.
+// (avancement du traitement), informations, réaffectation, et journal des
+// échanges avec l'assuré (appels, visites, emails…) et du suivi interne.
 // ---------------------------------------------------------------------------
 
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import StatutSelect from '../components/StatutSelect.jsx'
+import Journal, { estEchange, trierJournal } from '../components/Journal.jsx'
 import { agentsDeLAgence } from '../lib/annuaire.js'
-import { STATUTS, PRIORITES } from '../lib/constants.js'
-import { formatDate, formatDateHeure, delaiEnJours, enDepassement } from '../lib/dates.js'
-
-// Apparence des types d'événements du journal.
-const TYPES_EVENEMENT = {
-  creation: { libelle: 'Création', classes: 'bg-blue-100 text-blue-800' },
-  statut: { libelle: 'Statut', classes: 'bg-emerald-100 text-emerald-800' },
-  affectation: { libelle: 'Affectation', classes: 'bg-purple-100 text-purple-800' },
-  priorite: { libelle: 'Priorité', classes: 'bg-orange-100 text-orange-800' },
-  note: { libelle: 'Note', classes: 'bg-amber-100 text-amber-800' },
-}
+import { STATUTS, PRIORITES, CANAUX_INTERACTION, NOTE_INTERNE } from '../lib/constants.js'
+import {
+  formatDate,
+  formatDateHeure,
+  delaiEnJours,
+  enDepassement,
+} from '../lib/dates.js'
 
 // Chemin de fer : les 5 étapes du traitement, avec l'étape courante mise
 // en avant et les étapes franchies cochées. Chaque étape est CLIQUABLE :
@@ -95,11 +92,12 @@ const CLASSE_SELECT =
 
 export default function FicheDossier() {
   const { id } = useParams()
-  const { dossiers, settings, changerStatut, ajouterNote, reaffecterAgent, changerPriorite } =
+  const { dossiers, settings, changerStatut, ajouterInteraction, reaffecterAgent, changerPriorite } =
     useData()
   const dossier = dossiers.find((d) => d.id === id)
 
-  const [note, setNote] = useState('')
+  const [canal, setCanal] = useState(CANAUX_INTERACTION[0])
+  const [texte, setTexte] = useState('')
   const [auteur, setAuteur] = useState('')
 
   if (!dossier) {
@@ -118,18 +116,16 @@ export default function FicheDossier() {
 
   const delai = delaiEnJours(dossier)
   const depasse = enDepassement(dossier, settings.delaiCible)
-  // Journal trié du plus récent au plus ancien (comparaison sur l'instant réel,
-  // les événements de démo et les événements saisis n'ayant pas le même fuseau).
-  const journal = [...(dossier.historique || [])].sort(
-    (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-  )
+  const historique = dossier.historique || []
+  const echanges = trierJournal(historique.filter(estEchange))
+  const dernierEchange = echanges[0]
 
-  const soumettreNote = (e) => {
+  const soumettre = (e) => {
     e.preventDefault()
-    const texte = note.trim()
-    if (!texte) return
-    ajouterNote(dossier, texte, auteur || dossier.agent)
-    setNote('')
+    const contenu = texte.trim()
+    if (!contenu) return
+    ajouterInteraction(dossier, { canal, texte: contenu, agent: auteur || dossier.agent })
+    setTexte('')
   }
 
   return (
@@ -224,39 +220,49 @@ export default function FicheDossier() {
         </dl>
         {dossier.commentaire && (
           <p className="mt-4 rounded-md bg-gray-50 px-3 py-2 text-sm text-gray-700">
-            <span className="font-medium text-gray-500">Commentaire initial : </span>
+            <span className="font-medium text-gray-500">Objet de la demande : </span>
             {dossier.commentaire}
           </p>
         )}
+        <p className="mt-3 text-xs text-gray-500">
+          {echanges.length === 0
+            ? "Aucun échange consigné avec l'assuré pour l'instant."
+            : `${echanges.length} échange${echanges.length > 1 ? 's' : ''} avec l'assuré · dernier contact le ${formatDateHeure(dernierEchange.date)} (${dernierEchange.canal})`}
+        </p>
       </div>
 
-      {/* Notes & interactions */}
+      {/* Échanges avec l'assuré et suivi */}
       <div className="rounded-lg bg-white p-5 shadow">
-        <h2 className="mb-3 text-sm font-semibold text-gray-800">Notes &amp; interactions</h2>
+        <h2 className="mb-3 text-sm font-semibold text-gray-800">Échanges et suivi</h2>
 
-        {/* Ajout d'une note */}
-        <form onSubmit={soumettreNote} className="mb-5 rounded-md border border-gray-200 p-3">
-          <label htmlFor="nouvelle-note" className="mb-1 block text-xs font-medium text-gray-500">
-            Ajouter une note (appel, visite, pièce reçue…)
-          </label>
-          <textarea
-            id="nouvelle-note"
-            rows={2}
-            value={note}
-            onChange={(e) => setNote(e.target.value)}
-            placeholder="Ex. Assuré rappelé : pièce d'identité promise pour demain."
-            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
-          />
-          <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-            <div className="flex items-center gap-2">
-              <label htmlFor="auteur-note" className="text-xs text-gray-500">
-                par
+        {/* Consigner un échange */}
+        <form onSubmit={soumettre} className="mb-5 rounded-md border border-gray-200 p-3">
+          <div className="mb-2 flex flex-wrap items-end gap-3">
+            <div>
+              <label htmlFor="canal-echange" className="mb-1 block text-xs font-medium text-gray-500">
+                Type d'échange
               </label>
               <select
-                id="auteur-note"
+                id="canal-echange"
+                value={canal}
+                onChange={(e) => setCanal(e.target.value)}
+                className="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
+              >
+                {CANAUX_INTERACTION.map((c) => (
+                  <option key={c}>{c}</option>
+                ))}
+                <option>{NOTE_INTERNE}</option>
+              </select>
+            </div>
+            <div>
+              <label htmlFor="auteur-echange" className="mb-1 block text-xs font-medium text-gray-500">
+                Agent
+              </label>
+              <select
+                id="auteur-echange"
                 value={auteur || dossier.agent}
                 onChange={(e) => setAuteur(e.target.value)}
-                className="rounded-md border border-gray-300 px-2 py-1 text-xs shadow-sm focus:border-cnps-500 focus:outline-none"
+                className="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
               >
                 {!agentsDeLAgence(settings, dossier.agence).includes(dossier.agent) && (
                   <option>{dossier.agent}</option>
@@ -266,42 +272,34 @@ export default function FicheDossier() {
                 ))}
               </select>
             </div>
+          </div>
+          <label htmlFor="texte-echange" className="mb-1 block text-xs font-medium text-gray-500">
+            {canal === NOTE_INTERNE ? 'Note (visible des agents uniquement)' : "Compte rendu de l'échange"}
+          </label>
+          <textarea
+            id="texte-echange"
+            rows={2}
+            value={texte}
+            onChange={(e) => setTexte(e.target.value)}
+            placeholder={
+              canal === NOTE_INTERNE
+                ? 'Ex. Dossier à vérifier avec le service prestations.'
+                : "Ex. Assuré rappelé : il apportera sa pièce d'identité demain."
+            }
+            className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
+          />
+          <div className="mt-2 flex justify-end">
             <button
               type="submit"
-              disabled={!note.trim()}
+              disabled={!texte.trim()}
               className="rounded-md bg-amber-500 px-3 py-1.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:cursor-not-allowed disabled:opacity-40"
             >
-              Ajouter la note
+              {canal === NOTE_INTERNE ? 'Ajouter la note' : "Consigner l'échange"}
             </button>
           </div>
         </form>
 
-        {/* Journal des événements */}
-        {journal.length === 0 ? (
-          <p className="text-sm text-gray-400">Aucun événement enregistré pour ce dossier.</p>
-        ) : (
-          <ol className="space-y-3">
-            {journal.map((evt) => {
-              const type = TYPES_EVENEMENT[evt.type] || TYPES_EVENEMENT.note
-              return (
-                <li key={evt.id} className="flex gap-3">
-                  <span
-                    className={`mt-0.5 h-fit shrink-0 rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase ${type.classes}`}
-                  >
-                    {type.libelle}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-sm text-gray-800">{evt.texte}</p>
-                    <p className="text-xs text-gray-400">
-                      {formatDateHeure(evt.date)}
-                      {evt.agent && ` — ${evt.agent}`}
-                    </p>
-                  </div>
-                </li>
-              )
-            })}
-          </ol>
-        )}
+        <Journal evenements={historique} messageVide="Rien à afficher pour ce filtre." />
       </div>
     </div>
   )

@@ -1,14 +1,16 @@
 // ---------------------------------------------------------------------------
 // Page "Fiche matricule" : vue à 360° d'un assuré ou d'un employeur,
-// identifié par son matricule (pas de nom dans le modèle de données —
-// conformité protection des données). Regroupe tous ses dossiers.
+// identifié par son matricule (pas de nom dans le modèle de données, par
+// conformité à la protection des données). Regroupe tous ses dossiers et
+// tous ses échanges avec la CNPS, toutes agences confondues.
 // ---------------------------------------------------------------------------
 
 import { useMemo } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import TableDossiers from '../components/TableDossiers.jsx'
-import { delaiEnJours, formatDate } from '../lib/dates.js'
+import Journal, { estEchange, trierJournal } from '../components/Journal.jsx'
+import { delaiEnJours, formatDate, formatDateHeure } from '../lib/dates.js'
 
 // Indicateur compact.
 function Indicateur({ libelle, valeur, detail }) {
@@ -31,7 +33,18 @@ export default function FicheMatricule() {
       .sort((a, b) => b.dateReception.localeCompare(a.dateReception))
     const clotures = lies.filter((d) => d.statut === 'Clôturé')
     const delais = clotures.map(delaiEnJours)
+    // Journal consolidé : chaque événement garde la référence de son dossier.
+    const evenements = lies.flatMap((d) =>
+      (d.historique || []).map((evt) => ({
+        ...evt,
+        id: `${d.id}-${evt.id}`,
+        dossier: { id: d.id, numero: d.numero, agence: d.agence },
+      })),
+    )
+    const echanges = trierJournal(evenements.filter(estEchange))
     return {
+      evenements,
+      echanges,
       lies,
       ouverts: lies.filter((d) => d.statut !== 'Clôturé').length,
       reclamations: lies.filter((d) => d.type === 'Réclamation').length,
@@ -93,8 +106,10 @@ export default function FicheMatricule() {
           </Link>
         </div>
         <p className="mt-2 text-xs text-gray-500">
-          Premier contact le {formatDate(infos.premierContact)} · Agence
-          {infos.agences.length > 1 ? 's' : ''} : {infos.agences.join(', ')}
+          Premier dossier le {formatDate(infos.premierContact)}
+          {infos.echanges[0] &&
+            ` · Dernier échange le ${formatDateHeure(infos.echanges[0].date)} (${infos.echanges[0].canal})`}
+          {' · '}Agence{infos.agences.length > 1 ? 's' : ''} : {infos.agences.join(', ')}
         </p>
       </div>
 
@@ -102,16 +117,20 @@ export default function FicheMatricule() {
       <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
         <Indicateur libelle="Dossiers au total" valeur={infos.lies.length} />
         <Indicateur libelle="En cours" valeur={infos.ouverts} />
-        <Indicateur libelle="Réclamations" valeur={infos.reclamations} />
+        <Indicateur
+          libelle="Échanges"
+          valeur={infos.echanges.length}
+          detail="appels, visites, emails…"
+        />
         <Indicateur
           libelle="Délai moyen"
-          valeur={infos.delaiMoyen == null ? '—' : `${infos.delaiMoyen.toFixed(1)} j`}
-          detail="de clôture"
+          valeur={infos.delaiMoyen == null ? '-' : `${infos.delaiMoyen.toFixed(1)} j`}
+          detail={`de clôture · ${infos.reclamations} réclamation${infos.reclamations > 1 ? 's' : ''}`}
         />
       </div>
 
       {/* Historique des dossiers */}
-      <div className="overflow-hidden rounded-lg bg-white shadow">
+      <div className="mb-4 overflow-hidden rounded-lg bg-white shadow">
         <div className="border-b border-gray-100 px-4 py-3">
           <h2 className="text-sm font-semibold text-gray-800">
             Historique des dossiers ({infos.lies.length})
@@ -122,6 +141,14 @@ export default function FicheMatricule() {
           delaiCible={settings.delaiCible}
           messageVide="Aucun dossier."
         />
+      </div>
+
+      {/* Tous les échanges avec l'assuré, tous dossiers confondus */}
+      <div className="rounded-lg bg-white p-5 shadow">
+        <h2 className="mb-3 text-sm font-semibold text-gray-800">
+          Échanges avec {typeTiers === 'Employeur' ? "l'employeur" : "l'assuré"}, toutes agences
+        </h2>
+        <Journal evenements={infos.evenements} messageVide="Rien à afficher pour ce filtre." />
       </div>
     </div>
   )

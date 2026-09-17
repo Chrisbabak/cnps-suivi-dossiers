@@ -129,6 +129,12 @@ netlify deploy --prod    # répondre "dist" si le dossier de publication est dem
 
 ## Fonctionnalités
 
+- **Échanges avec l'assuré** : chaque dossier consigne les appels entrants et sortants, visites
+  en agence, emails, courriers et messages WhatsApp (plus des notes internes), avec un journal
+  filtrable ; la fiche assuré regroupe tous ses échanges, tous dossiers et toutes agences
+  confondus ; le pilotage mesure les échanges par canal
+- **Reprise d'historique** : import CSV pour migrer les demandes et réclamations d'un outil existant
+
 - **Nouveau dossier** : formulaire complet, numéro auto au format `D-AAAA-NNN` (compteur annuel)
 - **Dossiers** : recherche plein texte (n°, matricule, motif, agent), filtres statut/agence/canal,
   tri par date, changement de statut directement dans la ligne (le passage à « Clôturé »

@@ -26,7 +26,7 @@ export function ilYaJoursIso(jours) {
 
 // Affichage français "JJ/MM/AAAA à HH:MM" pour un horodatage complet.
 export function formatDateHeure(iso) {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const d = new Date(iso)
   if (Number.isNaN(d.getTime())) return iso
   return `${d.toLocaleDateString('fr-FR')} à ${d.toLocaleTimeString('fr-FR', {
@@ -37,7 +37,7 @@ export function formatDateHeure(iso) {
 
 // Affichage français "JJ/MM/AAAA".
 export function formatDate(iso) {
-  if (!iso) return '—'
+  if (!iso) return '-'
   const [annee, mois, jour] = iso.split('-')
   return `${jour}/${mois}/${annee}`
 }

@@ -157,7 +157,7 @@ export default function NouveauDossier() {
                 <ul className="mt-1 space-y-0.5">
                   {doublons.map((d) => (
                     <li key={d.id}>
-                      <span className="font-mono">{d.numero}</span> — {d.motif} — {d.agence} —{' '}
+                      <span className="font-mono">{d.numero}</span> · {d.motif} · {d.agence} ·{' '}
                       {d.statut} ({delaiEnJours(d)} j)
                     </li>
                   ))}

@@ -31,7 +31,7 @@ function ListeUtilisateurs({ id, titre, utilisateurs, agences, onChange, placeho
             className="flex items-center justify-between rounded-md bg-gray-50 px-3 py-1.5 text-sm text-gray-800"
           >
             <span>
-              {u.nom} <span className="text-xs text-gray-500">— {u.agence}</span>
+              {u.nom} <span className="text-xs text-gray-500">({u.agence})</span>
             </span>
             <button
               type="button"
@@ -152,7 +152,7 @@ export default function Parametres() {
       const parties = [`${importes} dossier(s) importé(s)`]
       if (doublons > 0) parties.push(`${doublons} doublon(s) ignoré(s)`)
       if (erreurs.length > 0) parties.push(erreurs.join(' '))
-      setMessage(parties.join(' — '))
+      setMessage(parties.join(' · '))
     }
     lecteur.readAsText(fichier, 'utf-8')
     e.target.value = '' // permet de réimporter le même fichier
@@ -241,7 +241,7 @@ export default function Parametres() {
               onClick={() => fichierRef.current?.click()}
               className="rounded-md border border-cnps-600 px-3 py-1.5 text-sm font-medium text-cnps-700 hover:bg-cnps-50"
             >
-              Importer un CSV
+              Reprendre un historique (CSV)
             </button>
             <input
               ref={fichierRef}
@@ -267,8 +267,9 @@ export default function Parametres() {
             </button>
           </div>
           <p className="mt-3 text-xs text-gray-500">
-            {dossiers.length} dossier(s) actuellement enregistré(s) dans ce navigateur. L’import
-            attend le même format que l’export CSV (séparateur « ; », en-têtes identiques) ; les
+            {dossiers.length} dossier(s) actuellement enregistré(s) dans ce navigateur. La reprise
+            d'historique permet de migrer les demandes et réclamations d'un outil existant : le
+            fichier suit le format de l'export CSV (séparateur « ; », mêmes en-têtes), et les
             numéros de dossier déjà présents sont ignorés.
           </p>
         </div>

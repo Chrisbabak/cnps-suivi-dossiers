@@ -114,7 +114,7 @@ export default function Accueil() {
       <div>
         <div className="mb-5">
           <h1 className="text-xl font-semibold text-gray-900">Bonjour</h1>
-          <p className="text-sm text-gray-500">Vue Admin — situation nationale, toutes agences.</p>
+          <p className="text-sm text-gray-500">Vue Admin : situation nationale, toutes agences.</p>
         </div>
 
         <div className="mb-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -160,7 +160,7 @@ export default function Accueil() {
         <div className="mb-5">
           <h1 className="text-xl font-semibold text-gray-900">Bonjour</h1>
           <p className="text-sm text-gray-500">
-            Vue Manager — situation de l'agence {session.agence}.
+            Vue Manager : situation de l'agence {session.agence}.
           </p>
         </div>
 
@@ -234,7 +234,7 @@ export default function Accueil() {
         <TableDossiers
           dossiers={stats.mesOuverts}
           delaiCible={cible}
-          messageVide={`Aucun dossier ouvert pour ${session?.nom || 'ce technicien'} — bravo !`}
+          messageVide={`Aucun dossier ouvert pour ${session?.nom || 'ce technicien'}, bravo !`}
         />
       </div>
 

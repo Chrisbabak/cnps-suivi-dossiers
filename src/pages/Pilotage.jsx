@@ -10,7 +10,7 @@ import { useData } from '../context/DataContext.jsx'
 import { getSession } from '../lib/auth.js'
 import { getDossierScope } from '../lib/permissions.js'
 import { delaiEnJours } from '../lib/dates.js'
-import { STATUTS, CANAUX, REGION_PAR_AGENCE } from '../lib/constants.js'
+import { STATUTS, CANAUX, TYPES, CANAUX_INTERACTION, REGION_PAR_AGENCE } from '../lib/constants.js'
 import { PALETTE_CNPS, COULEURS_STATUT } from '../lib/couleurs.js'
 
 // --- Composants graphiques ---------------------------------------------------
@@ -42,12 +42,12 @@ function KpiJauge({ libelle, pct, detail }) {
           transform="rotate(-90 32 32)"
         />
         <text x="32" y="37" textAnchor="middle" fontSize="15" fontWeight="700" fill="#111827">
-          {pct == null ? '—' : `${pct}`}
+          {pct == null ? '-' : `${pct}`}
         </text>
       </svg>
       <div>
         <p className="text-xs font-medium uppercase tracking-wide text-gray-500">{libelle}</p>
-        <p className="mt-0.5 text-lg font-bold text-gray-900">{pct == null ? '—' : `${pct} %`}</p>
+        <p className="mt-0.5 text-lg font-bold text-gray-900">{pct == null ? '-' : `${pct} %`}</p>
         {detail && <p className="text-xs text-gray-500">{detail}</p>}
       </div>
     </div>
@@ -125,7 +125,7 @@ function Camembert({ titre, donnees, uniteCentre = 'dossiers' }) {
                 <span className="flex-1 truncate text-gray-700">{d.label}</span>
                 <span className="font-semibold text-gray-900">{d.valeur}</span>
                 <span className="w-9 text-right text-gray-400">
-                  {total > 0 ? `${Math.round((100 * d.valeur) / total)} %` : '—'}
+                  {total > 0 ? `${Math.round((100 * d.valeur) / total)} %` : '-'}
                 </span>
               </li>
             ))}
@@ -345,6 +345,22 @@ export default function Pilotage() {
       pctDansDelais,
       reclamations: dossiers.filter((d) => d.type === 'Réclamation').length,
       // Camemberts : ordre FIXE des catégories → couleur stable par catégorie.
+      parType: TYPES.map((type, i) => ({
+        label: type,
+        valeur: compterValeur(dossiers, 'type', type),
+        couleur: PALETTE_CNPS[i],
+      })),
+      // Échanges avec les assurés (appels, visites, emails…) consignés dans les dossiers.
+      echangesParCanal: CANAUX_INTERACTION.map((canal, i) => ({
+        label: canal,
+        valeur: dossiers.reduce(
+          (somme, d) =>
+            somme +
+            (d.historique || []).filter((e) => e.type === 'interaction' && e.canal === canal).length,
+          0,
+        ),
+        couleur: PALETTE_CNPS[i % PALETTE_CNPS.length],
+      })),
       parStatut: STATUTS.map((s) => ({
         label: s,
         valeur: compterValeur(dossiers, 'statut', s),
@@ -370,7 +386,7 @@ export default function Pilotage() {
       <div className="rounded-lg border-2 border-dashed border-gray-300 bg-white p-10 text-center">
         <h1 className="mb-1 text-xl font-semibold text-gray-900">Pilotage</h1>
         <p className="text-sm text-gray-500">
-          Aucun dossier pour le moment — les indicateurs apparaîtront dès la première saisie.{' '}
+          Aucun dossier pour le moment : les indicateurs apparaîtront dès la première saisie.{' '}
           <Link to="/dossiers" className="text-cnps-600 underline">
             Aller aux dossiers
           </Link>
@@ -382,7 +398,7 @@ export default function Pilotage() {
   return (
     <div>
       <h1 className="mb-4 text-xl font-semibold text-gray-900">
-        Pilotage{scope.agence ? ` — Agence ${scope.agence}` : ' national'}
+        Pilotage{scope.agence ? ` de l'agence ${scope.agence}` : ' national'}
       </h1>
 
       {/* Indicateurs clés (liserés aux couleurs de la charte CNPS) */}
@@ -392,7 +408,7 @@ export default function Pilotage() {
         <Kpi libelle="Clôturés" valeur={stats.clotures} couleur="#2F9E41" />
         <Kpi
           libelle="Délai moyen"
-          valeur={stats.delaiMoyen == null ? '—' : `${stats.delaiMoyen.toFixed(1)} j`}
+          valeur={stats.delaiMoyen == null ? '-' : `${stats.delaiMoyen.toFixed(1)} j`}
           detail="de clôture"
           couleur="#C96A06"
         />
@@ -413,8 +429,14 @@ export default function Pilotage() {
 
       {/* Camemberts */}
       <div className="mb-4 grid grid-cols-1 gap-4 md:grid-cols-2">
+        <Camembert titre="Demandes et réclamations" donnees={stats.parType} />
+        <Camembert
+          titre="Échanges avec les assurés, par canal"
+          donnees={stats.echangesParCanal}
+          uniteCentre="échanges"
+        />
         <Camembert titre="Répartition par statut" donnees={stats.parStatut} />
-        <Camembert titre="Répartition par canal" donnees={stats.parCanal} />
+        <Camembert titre="Canal de réception des dossiers" donnees={stats.parCanal} />
       </div>
 
       {/* Barres horizontales */}

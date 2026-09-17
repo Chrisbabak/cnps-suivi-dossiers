@@ -42,6 +42,11 @@ export default function Dossiers() {
   const [triRecent, setTriRecent] = useState(true) // true = plus récents d'abord
   const [matriculeOuvert, setMatriculeOuvert] = useState(null)
 
+  // Nombre de dossiers dans le périmètre du rôle (et non au niveau national).
+  const totalPerimetre = scope.agence
+    ? dossiers.filter((d) => d.agence === scope.agence).length
+    : dossiers.length
+
   // Liste filtrée et triée (recalculée à chaque changement de données/filtres).
   const affiches = useMemo(() => {
     const texte = recherche.trim().toLowerCase()
@@ -385,8 +390,10 @@ export default function Dossiers() {
           </div>
           <p className="border-t border-gray-100 px-3 py-2 text-xs text-gray-500">
             {affiches.length} dossier{affiches.length > 1 ? 's' : ''} affiché
-            {affiches.length > 1 ? 's' : ''} sur {dossiers.length} — les lignes en rouge dépassent
-            le délai cible ({settings.delaiCible} jours).
+            {affiches.length > 1 ? 's' : ''}
+            {affiches.length < totalPerimetre && ` sur ${totalPerimetre}`}
+            {scope.agence ? ` pour l'agence ${scope.agence}` : ''}. Les lignes en rouge dépassent le
+            délai cible ({settings.delaiCible} jours).
           </p>
         </div>
       )}
