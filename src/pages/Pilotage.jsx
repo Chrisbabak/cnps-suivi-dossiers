@@ -9,7 +9,7 @@ import { Link } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import { getSession } from '../lib/auth.js'
 import { getDossierScope } from '../lib/permissions.js'
-import { delaiEnJours } from '../lib/dates.js'
+import { delaiEnJours, delaiCibleDossier } from '../lib/dates.js'
 import { STATUTS, CANAUX, TYPES, CANAUX_INTERACTION, REGION_PAR_AGENCE } from '../lib/constants.js'
 import { PALETTE_CNPS, COULEURS_STATUT } from '../lib/couleurs.js'
 
@@ -322,7 +322,6 @@ export default function Pilotage() {
   )
 
   const stats = useMemo(() => {
-    const cible = settings.delaiCible
     const clotures = dossiers.filter((d) => d.statut === 'Clôturé')
     const ouverts = dossiers.filter((d) => d.statut !== 'Clôturé')
 
@@ -330,7 +329,7 @@ export default function Pilotage() {
     const delaiMoyen =
       delais.length > 0 ? delais.reduce((somme, x) => somme + x, 0) / delais.length : null
 
-    const dansLesDelais = clotures.filter((d) => delaiEnJours(d) <= cible).length
+    const dansLesDelais = clotures.filter((d) => delaiEnJours(d) <= delaiCibleDossier(d, settings)).length
     const pctDansDelais =
       clotures.length > 0 ? Math.round((100 * dansLesDelais) / clotures.length) : null
 
@@ -379,7 +378,7 @@ export default function Pilotage() {
       ),
       chargeParAgent: compterPar(ouverts, 'agent'),
     }
-  }, [dossiers, settings.delaiCible])
+  }, [dossiers, settings])
 
   if (dossiers.length === 0) {
     return (
@@ -416,7 +415,7 @@ export default function Pilotage() {
           <KpiJauge
             libelle="Dans les délais"
             pct={stats.pctDansDelais}
-            detail={`cible : ${settings.delaiCible} jours`}
+            detail="délai cible selon le motif"
           />
         </div>
         <Kpi libelle="Réclamations" valeur={stats.reclamations} couleur="#7C4DBE" />

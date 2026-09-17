@@ -59,9 +59,9 @@ function Barres({ donnees, uniteAria }) {
 }
 
 // Trie les dossiers ouverts : dépassements d'abord, puis urgents, puis anciens.
-function trierParPriorite(dossiers, delaiCible) {
+function trierParPriorite(dossiers, settings) {
   return [...dossiers].sort((a, b) => {
-    const score = (d) => (enDepassement(d, delaiCible) ? 2 : 0) + (d.priorite === 'Urgente' ? 1 : 0)
+    const score = (d) => (enDepassement(d, settings) ? 2 : 0) + (d.priorite === 'Urgente' ? 1 : 0)
     return score(b) - score(a) || a.dateReception.localeCompare(b.dateReception)
   })
 }
@@ -78,7 +78,7 @@ function compterOuvertsPar(dossiersOuverts, champ) {
 export default function Accueil() {
   const { dossiers, settings } = useData()
   const session = getSession()
-  const cible = settings.delaiCible
+  const cible = settings
 
   const stats = useMemo(() => {
     const ouverts = dossiers.filter((d) => d.statut !== 'Clôturé')
@@ -145,7 +145,7 @@ export default function Accueil() {
           </div>
           <TableDossiers
             dossiers={stats.ouvertsGlobal}
-            delaiCible={cible}
+            settings={settings}
             messageVide="Aucun dossier ouvert."
           />
         </div>
@@ -195,7 +195,7 @@ export default function Accueil() {
           </div>
           <TableDossiers
             dossiers={stats.agenceOuverts}
-            delaiCible={cible}
+            settings={settings}
             messageVide={`Aucun dossier ouvert dans l'agence ${session.agence}.`}
           />
         </div>
@@ -233,7 +233,7 @@ export default function Accueil() {
         </div>
         <TableDossiers
           dossiers={stats.mesOuverts}
-          delaiCible={cible}
+          settings={settings}
           messageVide={`Aucun dossier ouvert pour ${session?.nom || 'ce technicien'}, bravo !`}
         />
       </div>
@@ -255,7 +255,7 @@ export default function Accueil() {
         </div>
         <TableDossiers
           dossiers={stats.agenceOuverts}
-          delaiCible={cible}
+          settings={settings}
           messageVide={`Aucun dossier ouvert dans l'agence ${session?.agence}.`}
         />
       </div>

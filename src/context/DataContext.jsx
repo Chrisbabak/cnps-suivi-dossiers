@@ -77,10 +77,12 @@ export function DataProvider({ children }) {
   }
 
   // Change le statut ; le passage à "Clôturé" enregistre la date de clôture.
-  const changerStatut = (dossier, statut) => {
+  // Le commentaire saisi lors de la confirmation est conservé dans le journal.
+  const changerStatut = (dossier, statut, commentaire = '', auteur = null) => {
     if (statut === dossier.statut) return
     const champs = { statut, dateCloture: statut === 'Clôturé' ? dossier.dateCloture || aujourdhuiIso() : null }
-    majAvecEvenement(dossier, champs, evenement('statut', `Statut modifié : ${dossier.statut} → ${statut}`))
+    const texte = `Statut modifié : ${dossier.statut} → ${statut}${commentaire ? `. ${commentaire}` : ''}`
+    majAvecEvenement(dossier, champs, evenement('statut', texte, auteur))
   }
 
   // Consigne un échange avec l'assuré (canal = appel, visite, email…) ou,
@@ -94,9 +96,9 @@ export function DataProvider({ children }) {
   }
 
   // Réaffecte le dossier à un autre agent.
-  const reaffecterAgent = (dossier, agent) => {
+  const reaffecterAgent = (dossier, agent, auteur = null) => {
     if (agent === dossier.agent) return
-    majAvecEvenement(dossier, { agent }, evenement('affectation', `Dossier réaffecté de ${dossier.agent} à ${agent}`))
+    majAvecEvenement(dossier, { agent }, evenement('affectation', `Dossier réaffecté de ${dossier.agent} à ${agent}`, auteur))
   }
 
   // Change la priorité du dossier.

@@ -8,12 +8,13 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import StatutSelect from '../components/StatutSelect.jsx'
+import { useConfirmationStatut, auteurSession } from '../components/ConfirmationStatut.jsx'
 import ModaleHistoriqueAssure from '../components/ModaleHistoriqueAssure.jsx'
 import { getSession } from '../lib/auth.js'
 import { getDossierScope, canDeleteDossier, canReassignDossier } from '../lib/permissions.js'
 import { agentsDeLAgence } from '../lib/annuaire.js'
 import { STATUTS, CANAUX, TYPES, GROUPES_MOTIFS } from '../lib/constants.js'
-import { formatDate, delaiEnJours, enDepassement } from '../lib/dates.js'
+import { formatDate, delaiEnJours, enDepassement, delaiCibleDossier } from '../lib/dates.js'
 import { telechargerCsv } from '../lib/csv.js'
 import { exportCsv } from '../lib/storage.js'
 import { aujourdhuiIso } from '../lib/dates.js'
@@ -22,8 +23,8 @@ const CLASSE_FILTRE =
   'rounded-md border border-gray-300 bg-white px-2.5 py-1.5 text-sm text-gray-900 shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500'
 
 export default function Dossiers() {
-  const { dossiers, changerStatut, reaffecterAgent, supprimerDossier, chargerDemo, settings } =
-    useData()
+  const { dossiers, reaffecterAgent, supprimerDossier, chargerDemo, settings } = useData()
+  const { demander, elements: confirmation } = useConfirmationStatut()
   const navigate = useNavigate()
 
   // Périmètre du rôle : agence verrouillée pour technicien et manager,
@@ -280,7 +281,7 @@ export default function Dossiers() {
               <tbody className="divide-y divide-gray-100">
                 {affiches.map((d) => {
                   const delai = delaiEnJours(d)
-                  const depasse = enDepassement(d, settings.delaiCible)
+                  const depasse = enDepassement(d, settings)
                   const enRetardOuvert = depasse && d.statut !== 'Clôturé'
                   return (
                     <tr
@@ -339,7 +340,7 @@ export default function Dossiers() {
                           // Réassignation limitée aux techniciens de l'agence du dossier
                           <select
                             value={d.agent}
-                            onChange={(e) => reaffecterAgent(d, e.target.value)}
+                            onChange={(e) => reaffecterAgent(d, e.target.value, auteurSession())}
                             aria-label={`Réassigner le dossier ${d.numero}`}
                             className="w-full min-w-[8rem] cursor-pointer rounded-md border border-gray-300 bg-white px-2 py-1 text-xs focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
                           >
@@ -356,7 +357,7 @@ export default function Dossiers() {
                       </td>
                       {/* stopPropagation : changer le statut ne doit pas ouvrir la fiche */}
                       <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
-                        <StatutSelect dossier={d} onChange={changerStatut} />
+                        <StatutSelect dossier={d} onChange={demander} />
                       </td>
                       <td
                         className={`whitespace-nowrap px-3 py-2 text-right font-medium ${
@@ -365,7 +366,7 @@ export default function Dossiers() {
                         title={
                           d.dateCloture
                             ? `Clôturé le ${formatDate(d.dateCloture)}`
-                            : `Délai cible : ${settings.delaiCible} j`
+                            : `Délai cible : ${delaiCibleDossier(d, settings)} j (${d.motif}${d.priorite === 'Urgente' ? ', urgent' : ''})`
                         }
                       >
                         {delai} j{depasse && <span aria-hidden="true"> ⚠</span>}
@@ -397,10 +398,11 @@ export default function Dossiers() {
             {affiches.length > 1 ? 's' : ''}
             {affiches.length < totalPerimetre && ` sur ${totalPerimetre}`}
             {scope.agence ? ` pour l'agence ${scope.agence}` : ''}. Les lignes en rouge dépassent le
-            délai cible ({settings.delaiCible} jours).
+            délai cible de leur motif (survolez le délai pour le voir).
           </p>
         </div>
       )}
+      {confirmation}
       {matriculeOuvert && (
         <ModaleHistoriqueAssure
           matricule={matriculeOuvert}

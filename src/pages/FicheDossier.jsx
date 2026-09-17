@@ -8,6 +8,7 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import StatutSelect from '../components/StatutSelect.jsx'
+import { useConfirmationStatut, auteurSession } from '../components/ConfirmationStatut.jsx'
 import Journal, { estEchange, trierJournal } from '../components/Journal.jsx'
 import { agentsDeLAgence } from '../lib/annuaire.js'
 import { STATUTS, PRIORITES, CANAUX_INTERACTION, NOTE_INTERNE } from '../lib/constants.js'
@@ -16,6 +17,7 @@ import {
   formatDateHeure,
   delaiEnJours,
   enDepassement,
+  delaiCibleDossier,
 } from '../lib/dates.js'
 
 // Chemin de fer : les 5 étapes du traitement, avec l'étape courante mise
@@ -92,9 +94,10 @@ const CLASSE_SELECT =
 
 export default function FicheDossier() {
   const { id } = useParams()
-  const { dossiers, settings, changerStatut, ajouterInteraction, reaffecterAgent, changerPriorite } =
+  const { dossiers, settings, ajouterInteraction, reaffecterAgent, changerPriorite } =
     useData()
   const dossier = dossiers.find((d) => d.id === id)
+  const { demander, elements: confirmation } = useConfirmationStatut()
 
   const [canal, setCanal] = useState(CANAUX_INTERACTION[0])
   const [texte, setTexte] = useState('')
@@ -115,7 +118,8 @@ export default function FicheDossier() {
   }
 
   const delai = delaiEnJours(dossier)
-  const depasse = enDepassement(dossier, settings.delaiCible)
+  const depasse = enDepassement(dossier, settings)
+  const cible = delaiCibleDossier(dossier, settings)
   const historique = dossier.historique || []
   const echanges = trierJournal(historique.filter(estEchange))
   const dernierEchange = echanges[0]
@@ -149,9 +153,9 @@ export default function FicheDossier() {
             )}
             <span
               className={`text-sm font-medium ${depasse ? 'text-red-600' : 'text-gray-500'}`}
-              title={`Délai cible : ${settings.delaiCible} jours`}
+              title={`Délai cible du motif « ${dossier.motif} »${dossier.priorite === 'Urgente' ? ', réduit de moitié car urgent' : ''}`}
             >
-              {delai} j{depasse && ' ⚠ hors délai'}
+              {delai} j sur {cible} j{depasse ? ' ⚠ hors délai' : ' · dans le délai'}
             </span>
           </div>
           <div className="flex items-center gap-2">
@@ -159,11 +163,11 @@ export default function FicheDossier() {
               Statut
             </label>
             <div className="w-44" id="statut-fiche">
-              <StatutSelect dossier={dossier} onChange={changerStatut} />
+              <StatutSelect dossier={dossier} onChange={demander} />
             </div>
           </div>
         </div>
-        <CheminDeFer statut={dossier.statut} onChange={(statut) => changerStatut(dossier, statut)} />
+        <CheminDeFer statut={dossier.statut} onChange={(statut) => demander(dossier, statut)} />
         <p className="mt-3 text-center text-xs text-gray-400">
           Cliquez sur une étape pour faire avancer (ou reculer) le dossier.
         </p>
@@ -192,7 +196,7 @@ export default function FicheDossier() {
             {/* Réaffectation limitée aux techniciens de l'agence du dossier */}
             <select
               value={dossier.agent}
-              onChange={(e) => reaffecterAgent(dossier, e.target.value)}
+              onChange={(e) => reaffecterAgent(dossier, e.target.value, auteurSession())}
               aria-label="Réaffecter le dossier à un agent"
               className={CLASSE_SELECT}
             >
@@ -301,6 +305,7 @@ export default function FicheDossier() {
 
         <Journal evenements={historique} messageVide="Rien à afficher pour ce filtre." />
       </div>
+      {confirmation}
     </div>
   )
 }

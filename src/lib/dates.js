@@ -51,7 +51,15 @@ export function delaiEnJours(dossier) {
   return Math.max(0, jours)
 }
 
-// Un dossier est "en dépassement" si son délai dépasse le délai cible.
-export function enDepassement(dossier, delaiCible) {
-  return delaiEnJours(dossier) > delaiCible
+// Délai cible d'un dossier (SLA), en jours calendaires :
+// celui de son motif (Paramètres), à défaut le délai cible général ;
+// un dossier urgent doit être traité deux fois plus vite.
+export function delaiCibleDossier(dossier, settings) {
+  const base = settings?.slaParMotif?.[dossier.motif] ?? settings?.delaiCible ?? 5
+  return dossier.priorite === 'Urgente' ? Math.max(1, Math.ceil(base / 2)) : base
+}
+
+// Un dossier est "hors délai" si son délai dépasse son délai cible.
+export function enDepassement(dossier, settings) {
+  return delaiEnJours(dossier) > delaiCibleDossier(dossier, settings)
 }

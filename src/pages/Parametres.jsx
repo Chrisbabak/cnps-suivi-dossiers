@@ -1,10 +1,11 @@
 // ---------------------------------------------------------------------------
-// Page "Paramètres" : listes configurables (agences, agents), délai cible,
+// Page "Paramètres" : annuaire (techniciens, managers), délais cibles par motif,
 // import CSV, chargement des données de démo et réinitialisation.
 // ---------------------------------------------------------------------------
 
 import { useRef, useState } from 'react'
 import { useData } from '../context/DataContext.jsx'
+import { GROUPES_MOTIFS } from '../lib/constants.js'
 
 // Éditeur d'annuaire : personnes rattachées à une agence (ajout / retrait).
 function ListeUtilisateurs({ id, titre, utilisateurs, agences, onChange, placeholder }) {
@@ -213,10 +214,51 @@ export default function Parametres() {
         />
 
         <div className="rounded-lg bg-white p-4 shadow">
-          <h2 className="mb-3 text-sm font-semibold text-gray-800">Délai cible de traitement</h2>
-          <div className="flex items-center gap-2">
+          <h2 className="mb-1 text-sm font-semibold text-gray-800">Délais cibles (SLA) par motif</h2>
+          <p className="mb-3 text-xs text-gray-500">
+            Un dossier est hors délai quand le nombre de jours calendaires depuis sa réception
+            dépasse le délai de son motif. Pour un dossier urgent, ce délai est divisé par deux.
+          </p>
+          <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
+            {GROUPES_MOTIFS.map((g) => (
+              <fieldset key={g.groupe}>
+                <legend className="mb-1.5 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  {g.groupe}
+                </legend>
+                <div className="space-y-1.5">
+                  {g.motifs.map((motif) => (
+                    <div key={motif} className="flex items-center justify-between gap-3">
+                      <label htmlFor={`sla-${motif}`} className="text-sm text-gray-700">
+                        {motif}
+                      </label>
+                      <div className="flex items-center gap-1.5">
+                        <input
+                          id={`sla-${motif}`}
+                          type="number"
+                          min={1}
+                          max={365}
+                          value={settings.slaParMotif?.[motif] ?? settings.delaiCible}
+                          onChange={(e) =>
+                            majSettings({
+                              slaParMotif: {
+                                ...settings.slaParMotif,
+                                [motif]: Math.max(1, parseInt(e.target.value, 10) || 1),
+                              },
+                            })
+                          }
+                          className="w-16 rounded-md border border-gray-300 px-2 py-1 text-right text-sm tabular-nums shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
+                        />
+                        <span className="text-xs text-gray-500">j</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </fieldset>
+            ))}
+          </div>
+          <div className="mt-4 flex items-center gap-2 border-t border-gray-100 pt-3">
             <label htmlFor="delai-cible" className="text-sm text-gray-700">
-              Un dossier est en dépassement au-delà de
+              Délai par défaut pour un motif sans délai propre :
             </label>
             <input
               id="delai-cible"
@@ -227,9 +269,9 @@ export default function Parametres() {
               onChange={(e) =>
                 majSettings({ delaiCible: Math.max(1, parseInt(e.target.value, 10) || 1) })
               }
-              className="w-20 rounded-md border border-gray-300 px-2 py-1.5 text-sm shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
+              className="w-16 rounded-md border border-gray-300 px-2 py-1 text-right text-sm tabular-nums shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
             />
-            <span className="text-sm text-gray-700">jours.</span>
+            <span className="text-xs text-gray-500">j</span>
           </div>
         </div>
 

@@ -138,7 +138,7 @@ export default function FicheMatricule() {
         </div>
         <TableDossiers
           dossiers={infos.lies}
-          delaiCible={settings.delaiCible}
+          settings={settings}
           messageVide="Aucun dossier."
         />
       </div>

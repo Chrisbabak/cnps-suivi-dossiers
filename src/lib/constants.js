@@ -119,5 +119,27 @@ export const DEFAULT_SETTINGS = {
     { nom: 'L. Coulibaly', agence: 'Korhogo' },
     { nom: "P. N'Dri", agence: 'Yamoussoukro' },
   ],
-  delaiCible: 5, // délai cible de traitement, en jours
+  delaiCible: 5, // délai cible par défaut (motif sans délai propre), en jours
+  // Délai cible par motif, en jours calendaires (réglable dans Paramètres).
+  slaParMotif: {
+    Retraite: 30,
+    'Pension de réversion': 30,
+    'Allocations familiales': 10,
+    Maternité: 10,
+    'Accident du travail': 15,
+    Invalidité: 30,
+    'Immatriculation employeur': 5,
+    'Déclaration des salaires': 10,
+    'Paiement des cotisations': 5,
+    Recouvrement: 15,
+    'Immatriculation assuré': 5,
+    'Affiliation travailleur indépendant': 5,
+    'Assurance volontaire': 5,
+    'Mise à jour du dossier': 3,
+    Attestation: 3,
+    'Relevé de carrière': 5,
+    "Demande d'information": 2,
+    'Suivi de dossier': 2,
+    Autre: 5,
+  },
 }

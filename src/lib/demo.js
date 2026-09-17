@@ -197,7 +197,7 @@ const MODELES = [
   },
   {
     r: 14, c: null, type: 'Réclamation', motif: 'Paiement des cotisations', canal: 'WhatsApp', priorite: 'Urgente',
-    matricule: 'E-051944', agence: 'Yamoussoukro', agent: 'D. Yao', statut: 'En cours',
+    matricule: 'E-051944', agence: 'Plateau', agent: 'A. Kouassi', statut: 'En cours',
     objet: 'Paiement effectué mais non imputé au compte employeur.',
     ech: [
       [0, '17:45', 'WhatsApp', 'Preuve de virement reçue.'],
@@ -248,11 +248,12 @@ const MODELES = [
   },
   {
     r: 7, c: null, type: 'Demande', motif: 'Déclaration des salaires', canal: 'Email', priorite: 'Normale',
-    matricule: 'E-058331', agence: 'Angré', agent: 'S. Traoré', statut: 'En cours',
+    matricule: 'E-058331', agence: 'Angré', agent: 'S. Traoré', statut: 'Validé', jv: 6,
     objet: 'Régularisation de la déclaration du troisième trimestre.',
     ech: [
       [0, '09:00', 'Email', 'Déclaration rectificative reçue.'],
       [3, '14:40', 'Appel sortant', 'Montant du reliquat confirmé avec le comptable.'],
+      [5, '10:20', 'Email', 'Justificatif de paiement du reliquat reçu.'],
     ],
   },
   {

@@ -53,6 +53,21 @@ cours existants pour le matricule saisi.
 > ⚠️ Ce contrôle d'accès est purement **cosmétique** (vérifié dans le navigateur, sans
 > serveur) : il préfigure les rôles du futur CRM mais ne protège pas réellement les données.
 
+## Délais cibles (SLA)
+
+- **Délai d'un dossier** : nombre de jours calendaires entre sa date de réception et sa date de
+  clôture (ou aujourd'hui s'il est encore ouvert).
+- **Délai cible** : fixé par motif dans Paramètres (ex. attestation 3 j, allocations familiales
+  10 j, retraite 30 j) ; un motif sans délai propre prend le délai par défaut (5 j). Un dossier
+  **urgent** a un délai cible divisé par deux (arrondi au jour supérieur).
+- **Hors délai** : le délai du dossier dépasse son délai cible. La ligne passe en rouge et le
+  dossier remonte en tête des listes de l'accueil.
+- **% dans les délais** (Pilotage) : part des dossiers clôturés dont le délai est inférieur ou
+  égal à leur délai cible.
+
+Chaque changement de statut passe par une **confirmation** (commentaire facultatif, enregistré
+dans le journal avec le nom de la personne connectée) ; une clôture déclenche des félicitations.
+
 ## Lancement en local
 
 ```bash

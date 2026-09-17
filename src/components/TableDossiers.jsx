@@ -10,7 +10,7 @@ import { STYLES_STATUT } from './StatutSelect.jsx'
 import ModaleHistoriqueAssure from './ModaleHistoriqueAssure.jsx'
 import { formatDate, delaiEnJours, enDepassement } from '../lib/dates.js'
 
-export default function TableDossiers({ dossiers, delaiCible, messageVide }) {
+export default function TableDossiers({ dossiers, settings, messageVide }) {
   const navigate = useNavigate()
   const [matriculeOuvert, setMatriculeOuvert] = useState(null)
 
@@ -35,7 +35,7 @@ export default function TableDossiers({ dossiers, delaiCible, messageVide }) {
         </thead>
         <tbody className="divide-y divide-gray-100">
           {dossiers.map((d) => {
-            const depasse = enDepassement(d, delaiCible)
+            const depasse = enDepassement(d, settings)
             const enRetardOuvert = depasse && d.statut !== 'Clôturé'
             return (
               <tr

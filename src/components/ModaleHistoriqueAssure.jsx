@@ -81,7 +81,7 @@ export default function ModaleHistoriqueAssure({ matricule, onFermer }) {
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {lies.map((d) => {
-                  const depasse = enDepassement(d, settings.delaiCible)
+                  const depasse = enDepassement(d, settings)
                   return (
                     <tr key={d.id}>
                       <td className="whitespace-nowrap px-3 py-2 tabular-nums font-semibold text-gray-900">
