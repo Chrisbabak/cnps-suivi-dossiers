@@ -242,7 +242,7 @@ const MODELES = [
   },
   {
     r: 8, c: null, type: 'Demande', motif: 'Mise à jour du dossier', canal: 'WhatsApp', priorite: 'Normale',
-    matricule: '211948307', agence: 'Angré', agent: 'N. Brou', statut: 'En cours',
+    matricule: '211948307', agence: 'Angré', agent: 'K. Yapi', statut: 'En cours',
     objet: 'Correction de la date de naissance.',
     ech: [[0, '12:30', 'WhatsApp', "Photo de l'extrait de naissance reçue."]],
   },

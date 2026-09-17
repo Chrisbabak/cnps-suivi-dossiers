@@ -11,6 +11,7 @@
 import { dossiersVersCsv } from './csv.js'
 import { DEFAULT_SETTINGS } from './constants.js'
 
+// v11 : troisième technicien à Angré, jeu de démo propre.
 // v10 : délais cibles par motif, scénario de démo ajusté.
 // v9 : agence d'Angré, motifs regroupés par domaine.
 // v8 : démo enrichie (34 dossiers, échanges typés avec l'assuré).
@@ -19,7 +20,7 @@ import { DEFAULT_SETTINGS } from './constants.js'
 // chaque navigateur à recharger une démo aux dates du jour).
 // Un changement de version repart d'un état neuf — les données de démo
 // sont rechargées automatiquement au lancement suivant.
-const STORAGE_KEY = 'cnps-suivi-dossiers-v10'
+const STORAGE_KEY = 'cnps-suivi-dossiers-v11'
 
 // Lit l'état complet { dossiers, settings } avec valeurs par défaut.
 function lireEtat() {
