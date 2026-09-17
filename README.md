@@ -140,9 +140,9 @@ netlify deploy --prod    # répondre "dist" si le dossier de publication est dem
   tri par date, changement de statut directement dans la ligne (le passage à « Clôturé »
   enregistre la date de clôture), lignes en rouge quand le délai cible est dépassé
 - **Pilotage** : KPI (total, en cours, clôturés, délai moyen, % dans les délais, réclamations),
-  répartitions par motif/canal/statut/agence et charge par agent — mis à jour en temps réel
+  répartitions par motif, canal, statut, agence, type et échanges, charge par agent, mises à jour en temps réel
 - **Paramètres** : agences, agents et délai cible configurables ; import CSV ;
-  bouton « Charger des données de démo » (12 dossiers fictifs, chargés automatiquement
+  bouton « Charger des données de démo » (34 dossiers fictifs, chargés automatiquement
   au premier lancement dans un navigateur, puis rechargeables à volonté) ;
   réinitialisation avec double confirmation (après réinitialisation, la démo ne se
   recharge pas toute seule)
