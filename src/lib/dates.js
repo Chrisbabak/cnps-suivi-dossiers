@@ -17,6 +17,12 @@ export function aujourdhuiIso() {
   return versIso(new Date())
 }
 
+// Date et heure locales au format d'un champ "datetime-local" (AAAA-MM-JJTHH:MM).
+export function maintenantLocal() {
+  const d = new Date()
+  return `${versIso(d)}T${pad(d.getHours())}:${pad(d.getMinutes())}`
+}
+
 // Date ISO d'il y a N jours (utilisé pour les données de démo).
 export function ilYaJoursIso(jours) {
   const d = new Date()

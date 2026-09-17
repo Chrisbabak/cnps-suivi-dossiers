@@ -18,6 +18,7 @@ import {
   delaiEnJours,
   enDepassement,
   delaiCibleDossier,
+  maintenantLocal,
 } from '../lib/dates.js'
 
 // Chemin de fer : les 5 étapes du traitement, avec l'étape courante mise
@@ -102,6 +103,7 @@ export default function FicheDossier() {
   const [canal, setCanal] = useState(CANAUX_INTERACTION[0])
   const [texte, setTexte] = useState('')
   const [auteur, setAuteur] = useState('')
+  const [dateEchange, setDateEchange] = useState(maintenantLocal)
 
   if (!dossier) {
     return (
@@ -128,8 +130,14 @@ export default function FicheDossier() {
     e.preventDefault()
     const contenu = texte.trim()
     if (!contenu) return
-    ajouterInteraction(dossier, { canal, texte: contenu, agent: auteur || dossier.agent })
+    ajouterInteraction(dossier, {
+      canal,
+      texte: contenu,
+      agent: auteur || dossier.agent,
+      date: dateEchange,
+    })
     setTexte('')
+    setDateEchange(maintenantLocal())
   }
 
   return (
@@ -275,6 +283,21 @@ export default function FicheDossier() {
                   <option key={a}>{a}</option>
                 ))}
               </select>
+            </div>
+            <div>
+              <label htmlFor="date-echange" className="mb-1 block text-xs font-medium text-gray-500">
+                Date et heure
+              </label>
+              <input
+                id="date-echange"
+                type="datetime-local"
+                required
+                value={dateEchange}
+                min={`${dossier.dateReception}T00:00`}
+                max={maintenantLocal()}
+                onChange={(e) => setDateEchange(e.target.value)}
+                className="rounded-md border border-gray-300 bg-white px-2 py-1.5 text-sm shadow-sm focus:border-cnps-500 focus:outline-none focus:ring-1 focus:ring-cnps-500"
+              />
             </div>
           </div>
           <label htmlFor="texte-echange" className="mb-1 block text-xs font-medium text-gray-500">

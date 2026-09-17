@@ -87,11 +87,13 @@ export function DataProvider({ children }) {
 
   // Consigne un échange avec l'assuré (canal = appel, visite, email…) ou,
   // pour une note interne, un simple commentaire d'agent.
-  const ajouterInteraction = (dossier, { canal, texte, agent }) => {
-    const evt =
+  // "date" (facultative) permet de consigner un échange qui a eu lieu plus tôt.
+  const ajouterInteraction = (dossier, { canal, texte, agent, date }) => {
+    const base =
       canal === NOTE_INTERNE
         ? evenement('note', texte, agent)
         : { ...evenement('interaction', texte, agent), canal }
+    const evt = date ? { ...base, date: new Date(date).toISOString() } : base
     majAvecEvenement(dossier, {}, evt)
   }
 
