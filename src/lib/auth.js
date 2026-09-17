@@ -7,6 +7,9 @@
 // Le vrai CRM aura une authentification serveur et des comptes individuels.
 // ---------------------------------------------------------------------------
 
+import { getSettings } from './storage.js'
+import { agenceDeAgent, agenceDeManager } from './annuaire.js'
+
 const CLE_SESSION = 'session'
 
 const COMPTES = [
@@ -26,13 +29,24 @@ export function verifierIdentifiants(identifiant, motDePasse) {
 }
 
 // Retourne la session courante { role, agence, nom } ou null.
+// L'agence est relue dans l'annuaire à chaque appel : si un rattachement
+// change, la session suit sans reconnexion. Une personne retirée de
+// l'annuaire perd sa session.
 export function getSession() {
+  let session
   try {
-    const session = JSON.parse(localStorage.getItem(CLE_SESSION))
-    return session && session.role ? session : null
+    session = JSON.parse(localStorage.getItem(CLE_SESSION))
   } catch {
     return null
   }
+  if (!session || !session.role) return null
+  if (session.role === 'admin') return session
+  const settings = getSettings()
+  const agence =
+    session.role === 'manager'
+      ? agenceDeManager(settings, session.nom)
+      : agenceDeAgent(settings, session.nom)
+  return agence ? { ...session, agence } : null
 }
 
 export function ouvrirSession(session) {
