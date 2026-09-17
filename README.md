@@ -21,8 +21,8 @@ L'application s'ouvre sur un écran de connexion. Trois comptes de démonstratio
 
 | Compte | Identifiant | Mot de passe | Personne | Agence (retrouvée dans l'annuaire) |
 | --- | --- | --- | --- | --- |
-| Technicien | `technicien` | `Tech2026` | S. Traoré | Yopougon |
-| Manager | `manager` | `Manager2026` | M. Koffi | Yopougon |
+| Technicien | `technicien` | `Tech2026` | S. Traoré | Angré |
+| Manager | `manager` | `Manager2026` | M. Koffi | Angré |
 | Admin | `admin` | `Admin2026` | | toutes agences |
 
 Chaque compte désigne une personne de l'annuaire. Techniciens et managers y sont rattachés

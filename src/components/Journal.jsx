@@ -114,7 +114,7 @@ export default function Journal({ evenements, messageVide }) {
                       {' · '}
                       <Link
                         to={`/dossiers/${evt.dossier.id}`}
-                        className="font-mono text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
+                        className="tabular-nums text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
                       >
                         {evt.dossier.numero}
                       </Link>{' '}

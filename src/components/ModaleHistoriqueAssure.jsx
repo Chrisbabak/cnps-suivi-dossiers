@@ -46,7 +46,7 @@ export default function ModaleHistoriqueAssure({ matricule, onFermer }) {
       >
         <div className="flex items-center justify-between border-b border-gray-200 px-4 py-3">
           <h2 className="text-sm font-semibold text-gray-900">
-            Historique de l'assuré <span className="font-mono">{matricule}</span>
+            Historique de l'assuré <span className="tabular-nums">{matricule}</span>
             <span className="ml-2 font-normal text-gray-500">
               {lies.length} dossier{lies.length > 1 ? 's' : ''} · toutes agences
             </span>
@@ -84,7 +84,7 @@ export default function ModaleHistoriqueAssure({ matricule, onFermer }) {
                   const depasse = enDepassement(d, settings.delaiCible)
                   return (
                     <tr key={d.id}>
-                      <td className="whitespace-nowrap px-3 py-2 font-mono text-xs font-semibold text-gray-900">
+                      <td className="whitespace-nowrap px-3 py-2 tabular-nums font-semibold text-gray-900">
                         {d.numero}
                       </td>
                       <td className="whitespace-nowrap px-3 py-2 text-gray-600">

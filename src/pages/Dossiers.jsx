@@ -12,7 +12,7 @@ import ModaleHistoriqueAssure from '../components/ModaleHistoriqueAssure.jsx'
 import { getSession } from '../lib/auth.js'
 import { getDossierScope, canDeleteDossier, canReassignDossier } from '../lib/permissions.js'
 import { agentsDeLAgence } from '../lib/annuaire.js'
-import { STATUTS, CANAUX, TYPES, MOTIFS } from '../lib/constants.js'
+import { STATUTS, CANAUX, TYPES, GROUPES_MOTIFS } from '../lib/constants.js'
 import { formatDate, delaiEnJours, enDepassement } from '../lib/dates.js'
 import { telechargerCsv } from '../lib/csv.js'
 import { exportCsv } from '../lib/storage.js'
@@ -144,8 +144,12 @@ export default function Dossiers() {
             className={CLASSE_FILTRE}
           >
             <option value="">Tous</option>
-            {MOTIFS.map((m) => (
-              <option key={m}>{m}</option>
+            {GROUPES_MOTIFS.map((g) => (
+              <optgroup key={g.groupe} label={g.groupe}>
+                {g.motifs.map((m) => (
+                  <option key={m}>{m}</option>
+                ))}
+              </optgroup>
             ))}
           </select>
         </div>
@@ -287,7 +291,7 @@ export default function Dossiers() {
                         enRetardOuvert ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'
                       }`}
                     >
-                      <td className="whitespace-nowrap px-3 py-2 font-mono text-xs font-semibold text-gray-900">
+                      <td className="whitespace-nowrap px-3 py-2 tabular-nums font-semibold text-gray-900">
                         {/* Lien explicite sur le numéro : accessible au clavier,
                             en plus du clic sur toute la ligne. */}
                         <Link
@@ -319,7 +323,7 @@ export default function Dossiers() {
                             setMatriculeOuvert(d.matricule)
                           }}
                           title={`Historique de l'assuré ${d.matricule}`}
-                          className="font-mono text-xs text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
+                          className="tabular-nums text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
                         >
                           {d.matricule}
                         </button>

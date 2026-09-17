@@ -9,16 +9,45 @@ export const CANAUX = ['Agence', 'Téléphone', 'Email', 'e-CNPS', 'WhatsApp', '
 
 export const TYPES = ['Demande', 'Réclamation']
 
-export const MOTIFS = [
-  'Prestations sociales',
-  'Recouvrement',
-  'Déclaration employeur',
-  'Paiement cotisations',
-  'Ouverture de dossier',
-  'Attestation',
-  'Mise à jour dossier',
-  'Autre',
+// Motifs regroupés par domaine, à l'image de ce que couvrira le CRM.
+export const GROUPES_MOTIFS = [
+  {
+    groupe: 'Prestations',
+    motifs: [
+      'Retraite',
+      'Pension de réversion',
+      'Allocations familiales',
+      'Maternité',
+      'Accident du travail',
+      'Invalidité',
+    ],
+  },
+  {
+    groupe: 'Employeurs et cotisations',
+    motifs: [
+      'Immatriculation employeur',
+      'Déclaration des salaires',
+      'Paiement des cotisations',
+      'Recouvrement',
+    ],
+  },
+  {
+    groupe: 'Assurés et affiliation',
+    motifs: [
+      'Immatriculation assuré',
+      'Affiliation travailleur indépendant',
+      'Assurance volontaire',
+      'Mise à jour du dossier',
+    ],
+  },
+  {
+    groupe: 'Documents et informations',
+    motifs: ['Attestation', 'Relevé de carrière', "Demande d'information", 'Suivi de dossier'],
+  },
+  { groupe: 'Autre', motifs: ['Autre'] },
 ]
+
+export const MOTIFS = GROUPES_MOTIFS.flatMap((g) => g.motifs)
 
 export const STATUTS = ['Nouveau', 'En cours', 'En attente pièces', 'Validé', 'Clôturé']
 
@@ -40,7 +69,7 @@ export const NOTE_INTERNE = 'Note interne'
 export const AGENCES = [
   { region: 'Abidjan', nom: 'Plateau' },
   { region: 'Abidjan', nom: 'Adjamé' },
-  { region: 'Abidjan', nom: 'Yopougon' },
+  { region: 'Abidjan', nom: 'Angré' },
   { region: 'Abidjan', nom: 'Treichville' },
   { region: 'Abidjan', nom: 'Cocody' },
   { region: 'Abidjan', nom: 'Abobo' },
@@ -72,8 +101,8 @@ export const DEFAULT_SETTINGS = {
   agents: [
     { nom: 'A. Kouassi', agence: 'Plateau' },
     { nom: 'M. Diabaté', agence: 'Plateau' },
-    { nom: 'S. Traoré', agence: 'Yopougon' },
-    { nom: 'N. Brou', agence: 'Yopougon' },
+    { nom: 'S. Traoré', agence: 'Angré' },
+    { nom: 'N. Brou', agence: 'Angré' },
     { nom: "F. N'Guessan", agence: 'Bouaké' },
     { nom: 'B. Koné', agence: 'Cocody' },
     { nom: 'R. Aka', agence: 'San Pedro' },
@@ -84,7 +113,7 @@ export const DEFAULT_SETTINGS = {
   managers: [
     { nom: 'K. Bamba', agence: 'Plateau' },
     { nom: 'A. Kouamé', agence: 'Bouaké' },
-    { nom: 'M. Koffi', agence: 'Yopougon' },
+    { nom: 'M. Koffi', agence: 'Angré' },
     { nom: 'S. Gnamien', agence: 'Cocody' },
     { nom: 'J. Tanoh', agence: 'San Pedro' },
     { nom: 'L. Coulibaly', agence: 'Korhogo' },

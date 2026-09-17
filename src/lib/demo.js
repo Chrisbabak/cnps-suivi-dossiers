@@ -25,7 +25,7 @@ const MODELES = [
     ech: [[4, '15:10', 'Visite en agence', 'Attestation remise en main propre au guichet.']],
   },
   {
-    r: 52, c: 9, type: 'Réclamation', motif: 'Prestations sociales', canal: 'Téléphone', priorite: 'Urgente',
+    r: 52, c: 9, type: 'Réclamation', motif: 'Retraite', canal: 'Téléphone', priorite: 'Urgente',
     matricule: '208119345', agence: 'Bouaké', agent: "F. N'Guessan", statut: 'Clôturé',
     objet: 'Pension non versée depuis deux mois.',
     ech: [
@@ -37,8 +37,8 @@ const MODELES = [
     notes: [[4, '14:00', 'Correction transmise au service paiement.']],
   },
   {
-    r: 49, c: 3, type: 'Demande', motif: 'Ouverture de dossier', canal: 'e-CNPS', priorite: 'Normale',
-    matricule: 'E-045210', agence: 'Yopougon', agent: 'S. Traoré', statut: 'Clôturé',
+    r: 49, c: 3, type: 'Demande', motif: 'Immatriculation employeur', canal: 'e-CNPS', priorite: 'Normale',
+    matricule: 'E-045210', agence: 'Angré', agent: 'S. Traoré', statut: 'Clôturé',
     objet: "Immatriculation d'un nouvel employeur (12 salariés).",
     ech: [
       [1, '10:15', 'Email', 'Statuts et registre de commerce demandés.'],
@@ -52,8 +52,8 @@ const MODELES = [
     ech: [[2, '11:00', 'Email', 'Attestation envoyée en pièce jointe.']],
   },
   {
-    r: 45, c: 6, type: 'Demande', motif: 'Prestations sociales', canal: 'Agence', priorite: 'Normale',
-    matricule: '190445120', agence: 'Yopougon', agent: 'N. Brou', statut: 'Clôturé',
+    r: 45, c: 6, type: 'Demande', motif: 'Allocations familiales', canal: 'Agence', priorite: 'Normale',
+    matricule: '190445120', agence: 'Angré', agent: 'N. Brou', statut: 'Clôturé',
     objet: "Demande d'allocations familiales pour un troisième enfant.",
     ech: [
       [0, '10:30', 'Visite en agence', 'Dossier déposé, extrait de naissance manquant.'],
@@ -72,7 +72,7 @@ const MODELES = [
     ],
   },
   {
-    r: 41, c: 5, type: 'Demande', motif: 'Mise à jour dossier', canal: 'Agence', priorite: 'Normale',
+    r: 41, c: 5, type: 'Demande', motif: 'Mise à jour du dossier', canal: 'Agence', priorite: 'Normale',
     matricule: '199245067', agence: 'Korhogo', agent: 'I. Ouattara', statut: 'Clôturé',
     objet: "Changement d'adresse et de coordonnées bancaires.",
     ech: [
@@ -81,7 +81,7 @@ const MODELES = [
     ],
   },
   {
-    r: 38, c: 3, type: 'Demande', motif: 'Attestation', canal: 'Téléphone', priorite: 'Normale',
+    r: 38, c: 3, type: 'Demande', motif: 'Relevé de carrière', canal: 'Téléphone', priorite: 'Normale',
     matricule: '184652090', agence: 'Plateau', agent: 'M. Diabaté', statut: 'Clôturé',
     objet: 'Relevé de carrière pour une simulation de retraite.',
     ech: [
@@ -90,8 +90,8 @@ const MODELES = [
     ],
   },
   {
-    r: 36, c: 7, type: 'Réclamation', motif: 'Paiement cotisations', canal: 'Email', priorite: 'Normale',
-    matricule: 'E-058331', agence: 'Yopougon', agent: 'S. Traoré', statut: 'Clôturé',
+    r: 36, c: 7, type: 'Réclamation', motif: 'Paiement des cotisations', canal: 'Email', priorite: 'Normale',
+    matricule: 'E-058331', agence: 'Angré', agent: 'S. Traoré', statut: 'Clôturé',
     objet: 'Double prélèvement des cotisations du deuxième trimestre.',
     ech: [
       [0, '08:50', 'Email', 'Relevé bancaire reçu montrant le double prélèvement.'],
@@ -101,7 +101,7 @@ const MODELES = [
     notes: [[3, '10:00', 'Écart confirmé par la comptabilité.']],
   },
   {
-    r: 33, c: 4, type: 'Demande', motif: 'Ouverture de dossier', canal: 'Agence', priorite: 'Normale',
+    r: 33, c: 4, type: 'Demande', motif: 'Affiliation travailleur indépendant', canal: 'Agence', priorite: 'Normale',
     matricule: '231154608', agence: 'Bouaké', agent: "F. N'Guessan", statut: 'Clôturé',
     objet: "Immatriculation d'un travailleur indépendant.",
     ech: [
@@ -110,7 +110,7 @@ const MODELES = [
     ],
   },
   {
-    r: 31, c: 2, type: 'Demande', motif: 'Déclaration employeur', canal: 'e-CNPS', priorite: 'Normale',
+    r: 31, c: 2, type: 'Demande', motif: 'Déclaration des salaires', canal: 'e-CNPS', priorite: 'Normale',
     matricule: 'E-061207', agence: 'Cocody', agent: 'B. Koné', statut: 'Clôturé',
     objet: 'Aide à la déclaration trimestrielle en ligne.',
     ech: [
@@ -119,7 +119,7 @@ const MODELES = [
     ],
   },
   {
-    r: 29, c: 8, type: 'Réclamation', motif: 'Prestations sociales', canal: 'WhatsApp', priorite: 'Urgente',
+    r: 29, c: 8, type: 'Réclamation', motif: 'Maternité', canal: 'WhatsApp', priorite: 'Urgente',
     matricule: '176004392', agence: 'Yamoussoukro', agent: 'D. Yao', statut: 'Clôturé',
     objet: 'Indemnités journalières de maternité non perçues.',
     ech: [
@@ -131,7 +131,7 @@ const MODELES = [
   },
   {
     r: 27, c: null, type: 'Demande', motif: 'Attestation', canal: 'Agence', priorite: 'Normale',
-    matricule: '222807561', agence: 'Yopougon', agent: 'S. Traoré', statut: 'En attente pièces',
+    matricule: '222807561', agence: 'Angré', agent: 'S. Traoré', statut: 'En attente pièces',
     objet: "Attestation d'immatriculation pour un dossier de visa.",
     ech: [
       [0, '10:20', 'Visite en agence', "Pièce d'identité expirée, nouvelle pièce demandée."],
@@ -139,7 +139,7 @@ const MODELES = [
     ],
   },
   {
-    r: 25, c: 3, type: 'Demande', motif: 'Mise à jour dossier', canal: 'Email', priorite: 'Normale',
+    r: 25, c: 3, type: 'Demande', motif: 'Mise à jour du dossier', canal: 'Email', priorite: 'Normale',
     matricule: '195532874', agence: 'Plateau', agent: 'A. Kouassi', statut: 'Clôturé',
     objet: "Ajout d'un ayant droit (conjoint).",
     ech: [
@@ -158,7 +158,7 @@ const MODELES = [
     notes: [[8, '15:00', "Demande d'annulation transmise au recouvrement."]],
   },
   {
-    r: 21, c: 5, type: 'Demande', motif: 'Prestations sociales', canal: 'Courrier', priorite: 'Normale',
+    r: 21, c: 5, type: 'Demande', motif: 'Pension de réversion', canal: 'Courrier', priorite: 'Normale',
     matricule: '188120995', agence: 'Korhogo', agent: 'I. Ouattara', statut: 'Clôturé',
     objet: 'Demande de pension de réversion.',
     ech: [
@@ -167,17 +167,17 @@ const MODELES = [
     ],
   },
   {
-    r: 20, c: null, type: 'Réclamation', motif: 'Prestations sociales', canal: 'Agence', priorite: 'Urgente',
-    matricule: '208119345', agence: 'Yopougon', agent: 'N. Brou', statut: 'En cours',
+    r: 20, c: null, type: 'Réclamation', motif: 'Retraite', canal: 'Agence', priorite: 'Urgente',
+    matricule: '208119345', agence: 'Angré', agent: 'N. Brou', statut: 'En cours',
     objet: 'Écart sur le montant du rappel de pension.',
     ech: [
-      [0, '10:00', 'Visite en agence', 'Assuré de passage à Yopougon, écart de 35 000 F constaté.'],
+      [0, '10:00', 'Visite en agence', 'Assuré de passage à Angré, écart de 35 000 F constaté.'],
       [4, '09:45', 'Appel sortant', 'Dossier transmis, assuré informé du délai de traitement.'],
     ],
     notes: [[1, '16:00', 'Historique consulté : réclamation précédente traitée à Bouaké.']],
   },
   {
-    r: 18, c: null, jv: 10, type: 'Demande', motif: 'Déclaration employeur', canal: 'e-CNPS', priorite: 'Normale',
+    r: 18, c: null, jv: 10, type: 'Demande', motif: 'Déclaration des salaires', canal: 'e-CNPS', priorite: 'Normale',
     matricule: 'E-045210', agence: 'Plateau', agent: 'M. Diabaté', statut: 'Validé',
     objet: 'Déclaration annuelle des salaires (DISA) à valider.',
     ech: [
@@ -187,7 +187,7 @@ const MODELES = [
     ],
   },
   {
-    r: 16, c: null, type: 'Demande', motif: 'Ouverture de dossier', canal: 'Agence', priorite: 'Normale',
+    r: 16, c: null, type: 'Demande', motif: 'Assurance volontaire', canal: 'Agence', priorite: 'Normale',
     matricule: '230098412', agence: 'Cocody', agent: 'B. Koné', statut: 'En attente pièces',
     objet: "Immatriculation d'un assuré volontaire.",
     ech: [
@@ -196,7 +196,7 @@ const MODELES = [
     ],
   },
   {
-    r: 14, c: null, type: 'Réclamation', motif: 'Paiement cotisations', canal: 'WhatsApp', priorite: 'Urgente',
+    r: 14, c: null, type: 'Réclamation', motif: 'Paiement des cotisations', canal: 'WhatsApp', priorite: 'Urgente',
     matricule: 'E-051944', agence: 'Yamoussoukro', agent: 'D. Yao', statut: 'En cours',
     objet: 'Paiement effectué mais non imputé au compte employeur.',
     ech: [
@@ -206,8 +206,8 @@ const MODELES = [
     notes: [[3, '11:00', 'Transmis à la comptabilité pour imputation.']],
   },
   {
-    r: 12, c: null, type: 'Demande', motif: 'Prestations sociales', canal: 'Téléphone', priorite: 'Normale',
-    matricule: '221073518', agence: 'Yopougon', agent: 'S. Traoré', statut: 'En cours',
+    r: 12, c: null, type: 'Demande', motif: 'Allocations familiales', canal: 'Téléphone', priorite: 'Normale',
+    matricule: '221073518', agence: 'Angré', agent: 'S. Traoré', statut: 'En cours',
     objet: "Demande d'allocations familiales, dossier en instruction.",
     ech: [
       [0, '10:05', 'Appel entrant', "Assurée demande où en est son dossier d'allocations."],
@@ -230,7 +230,7 @@ const MODELES = [
     ech: [[0, '09:50', 'Visite en agence', 'Demande déposée au guichet.']],
   },
   {
-    r: 9, c: null, type: 'Réclamation', motif: 'Prestations sociales', canal: 'Téléphone', priorite: 'Urgente',
+    r: 9, c: null, type: 'Réclamation', motif: 'Retraite', canal: 'Téléphone', priorite: 'Urgente',
     matricule: '184652090', agence: 'Plateau', agent: 'A. Kouassi', statut: 'En cours',
     objet: 'Montant de pension jugé incorrect après revalorisation.',
     ech: [
@@ -241,14 +241,14 @@ const MODELES = [
     notes: [[4, '09:00', 'Transmis au service prestations pour recalcul.']],
   },
   {
-    r: 8, c: null, type: 'Demande', motif: 'Mise à jour dossier', canal: 'WhatsApp', priorite: 'Normale',
-    matricule: '211948307', agence: 'Yopougon', agent: 'N. Brou', statut: 'En cours',
+    r: 8, c: null, type: 'Demande', motif: 'Mise à jour du dossier', canal: 'WhatsApp', priorite: 'Normale',
+    matricule: '211948307', agence: 'Angré', agent: 'N. Brou', statut: 'En cours',
     objet: 'Correction de la date de naissance.',
     ech: [[0, '12:30', 'WhatsApp', "Photo de l'extrait de naissance reçue."]],
   },
   {
-    r: 7, c: null, type: 'Demande', motif: 'Déclaration employeur', canal: 'Email', priorite: 'Normale',
-    matricule: 'E-058331', agence: 'Yopougon', agent: 'S. Traoré', statut: 'En cours',
+    r: 7, c: null, type: 'Demande', motif: 'Déclaration des salaires', canal: 'Email', priorite: 'Normale',
+    matricule: 'E-058331', agence: 'Angré', agent: 'S. Traoré', statut: 'En cours',
     objet: 'Régularisation de la déclaration du troisième trimestre.',
     ech: [
       [0, '09:00', 'Email', 'Déclaration rectificative reçue.'],
@@ -256,7 +256,7 @@ const MODELES = [
     ],
   },
   {
-    r: 6, c: null, type: 'Demande', motif: 'Prestations sociales', canal: 'Agence', priorite: 'Normale',
+    r: 6, c: null, type: 'Demande', motif: 'Retraite', canal: 'Agence', priorite: 'Normale',
     matricule: '205571163', agence: 'Bouaké', agent: "F. N'Guessan", statut: 'En cours',
     objet: 'Demande de pension de vieillesse.',
     ech: [[0, '10:40', 'Visite en agence', 'Dossier de retraite déposé complet.']],
@@ -271,31 +271,31 @@ const MODELES = [
     ],
   },
   {
-    r: 4, c: null, type: 'Demande', motif: 'Autre', canal: 'Courrier', priorite: 'Normale',
+    r: 4, c: null, type: 'Demande', motif: "Demande d'information", canal: 'Courrier', priorite: 'Normale',
     matricule: 'E-072264', agence: 'Yamoussoukro', agent: 'D. Yao', statut: 'Nouveau',
     objet: "Demande de rendez-vous pour un contrôle d'assiette.",
     ech: [[0, '10:00', 'Courrier', "Courrier de l'employeur enregistré."]],
   },
   {
-    r: 3, c: null, type: 'Réclamation', motif: 'Prestations sociales', canal: 'Agence', priorite: 'Urgente',
-    matricule: '226315870', agence: 'Yopougon', agent: 'S. Traoré', statut: 'Nouveau',
+    r: 3, c: null, type: 'Réclamation', motif: 'Accident du travail', canal: 'Agence', priorite: 'Urgente',
+    matricule: '226315870', agence: 'Angré', agent: 'S. Traoré', statut: 'Nouveau',
     objet: "Rente d'accident du travail suspendue sans explication.",
     ech: [[0, '09:25', 'Visite en agence', 'Assuré reçu au guichet, très inquiet.']],
   },
   {
-    r: 2, c: null, type: 'Demande', motif: 'Ouverture de dossier', canal: 'e-CNPS', priorite: 'Normale',
+    r: 2, c: null, type: 'Demande', motif: 'Immatriculation employeur', canal: 'e-CNPS', priorite: 'Normale',
     matricule: 'E-074491', agence: 'Cocody', agent: 'B. Koné', statut: 'Nouveau',
     objet: "Immatriculation d'une nouvelle entreprise (5 salariés).",
     ech: [[0, '15:00', 'Email', 'Demande reçue via e-CNPS.']],
   },
   {
     r: 1, c: null, type: 'Demande', motif: 'Attestation', canal: 'Email', priorite: 'Normale',
-    matricule: '190445120', agence: 'Yopougon', agent: 'S. Traoré', statut: 'Nouveau',
+    matricule: '190445120', agence: 'Angré', agent: 'S. Traoré', statut: 'Nouveau',
     objet: 'Attestation de droits aux prestations familiales.',
     ech: [[0, '08:55', 'Email', 'Demande reçue par email.']],
   },
   {
-    r: 1, c: null, type: 'Demande', motif: 'Mise à jour dossier', canal: 'Téléphone', priorite: 'Normale',
+    r: 1, c: null, type: 'Demande', motif: 'Mise à jour du dossier', canal: 'Téléphone', priorite: 'Normale',
     matricule: '243377058', agence: 'Plateau', agent: 'M. Diabaté', statut: 'Nouveau',
     objet: 'Changement de numéro de téléphone.',
     ech: [[0, '10:30', 'Appel entrant', 'Demande de mise à jour du contact.']],

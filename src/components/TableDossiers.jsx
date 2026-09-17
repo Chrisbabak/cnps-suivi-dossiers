@@ -46,7 +46,7 @@ export default function TableDossiers({ dossiers, delaiCible, messageVide }) {
                   enRetardOuvert ? 'bg-red-50 hover:bg-red-100' : 'hover:bg-gray-50'
                 }`}
               >
-                <td className="whitespace-nowrap px-3 py-2 font-mono text-xs font-semibold text-gray-900">
+                <td className="whitespace-nowrap px-3 py-2 tabular-nums font-semibold text-gray-900">
                   {d.numero}
                   {d.priorite === 'Urgente' && (
                     <span className="ml-1.5 rounded bg-red-100 px-1.5 py-0.5 text-[10px] font-bold uppercase text-red-700">
@@ -68,7 +68,7 @@ export default function TableDossiers({ dossiers, delaiCible, messageVide }) {
                       setMatriculeOuvert(d.matricule)
                     }}
                     title={`Historique de l'assuré ${d.matricule}`}
-                    className="font-mono text-xs text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
+                    className="tabular-nums text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
                   >
                     {d.matricule}
                   </button>

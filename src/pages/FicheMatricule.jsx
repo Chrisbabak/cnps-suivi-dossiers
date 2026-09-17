@@ -61,7 +61,7 @@ export default function FicheMatricule() {
     return (
       <div className="rounded-lg border-2 border-dashed border-gray-300 bg-white p-10 text-center">
         <p className="mb-2 font-medium text-gray-700">
-          Aucun dossier pour le matricule <span className="font-mono">{matricule}</span>
+          Aucun dossier pour le matricule <span className="tabular-nums">{matricule}</span>
         </p>
         <div className="flex flex-wrap justify-center gap-3 text-sm">
           <Link to="/dossiers" className="text-cnps-600 underline">
@@ -88,7 +88,7 @@ export default function FicheMatricule() {
       <div className="mb-4 rounded-lg bg-white p-5 shadow">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-mono text-xl font-bold text-gray-900">{matricule}</h1>
+            <h1 className="tabular-nums text-xl font-bold text-gray-900">{matricule}</h1>
             <span className="rounded-full bg-cnps-100 px-2.5 py-0.5 text-xs font-medium text-cnps-800">
               {typeTiers}
             </span>

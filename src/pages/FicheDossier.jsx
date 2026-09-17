@@ -138,7 +138,7 @@ export default function FicheDossier() {
       <div className="mb-4 rounded-lg bg-white p-5 shadow">
         <div className="mb-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2">
-            <h1 className="font-mono text-xl font-bold text-gray-900">{dossier.numero}</h1>
+            <h1 className="tabular-nums text-xl font-bold text-gray-900">{dossier.numero}</h1>
             <span className="rounded-full bg-cnps-100 px-2.5 py-0.5 text-xs font-medium text-cnps-800">
               {dossier.type}
             </span>
@@ -178,7 +178,7 @@ export default function FicheDossier() {
             <Link
               to={`/matricules/${encodeURIComponent(dossier.matricule)}`}
               title={`Voir la fiche du matricule ${dossier.matricule}`}
-              className="font-mono text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
+              className="tabular-nums text-cnps-700 underline decoration-cnps-200 underline-offset-2 hover:decoration-cnps-600"
             >
               {dossier.matricule}
             </Link>

@@ -8,7 +8,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import { getSession } from '../lib/auth.js'
 import { agentsDeLAgence } from '../lib/annuaire.js'
-import { CANAUX, TYPES, MOTIFS, PRIORITES } from '../lib/constants.js'
+import { CANAUX, TYPES, MOTIFS, GROUPES_MOTIFS, PRIORITES } from '../lib/constants.js'
 import { aujourdhuiIso, delaiEnJours } from '../lib/dates.js'
 
 // Petit composant de champ avec libellé (accessibilité : label relié au champ).
@@ -101,7 +101,7 @@ export default function NouveauDossier() {
           className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
         >
           <span>
-            Dossier <strong className="font-mono">{confirmation}</strong> enregistré avec succès.
+            Dossier <strong className="tabular-nums">{confirmation}</strong> enregistré avec succès.
           </span>
           <Link to="/dossiers" className="font-medium text-cnps-600 underline hover:text-cnps-800">
             Voir la liste des dossiers
@@ -129,8 +129,12 @@ export default function NouveauDossier() {
 
           <Champ id="motif" label="Motif">
             <select id="motif" value={form.motif} onChange={changer('motif')} className={CLASSE_CHAMP}>
-              {MOTIFS.map((m) => (
-                <option key={m}>{m}</option>
+              {GROUPES_MOTIFS.map((g) => (
+                <optgroup key={g.groupe} label={g.groupe}>
+                  {g.motifs.map((m) => (
+                    <option key={m}>{m}</option>
+                  ))}
+                </optgroup>
               ))}
             </select>
           </Champ>
@@ -157,7 +161,7 @@ export default function NouveauDossier() {
                 <ul className="mt-1 space-y-0.5">
                   {doublons.map((d) => (
                     <li key={d.id}>
-                      <span className="font-mono">{d.numero}</span> · {d.motif} · {d.agence} ·{' '}
+                      <span className="tabular-nums">{d.numero}</span> · {d.motif} · {d.agence} ·{' '}
                       {d.statut} ({delaiEnJours(d)} j)
                     </li>
                   ))}

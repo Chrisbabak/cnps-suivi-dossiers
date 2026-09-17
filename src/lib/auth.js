@@ -44,7 +44,7 @@ export function fermerSession() {
 }
 
 // Libellé du profil affiché dans l'en-tête, ex. :
-// "Profil : Technicien, S. Traoré (Yopougon)" / "Profil : Admin"
+// "Profil : Technicien, S. Traoré (Angré)" / "Profil : Admin"
 export function libelleSession(session = getSession()) {
   if (!session) return ''
   if (session.role === 'admin') return 'Profil : Admin'
