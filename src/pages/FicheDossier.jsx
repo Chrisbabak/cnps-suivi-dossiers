@@ -5,7 +5,7 @@
 // ---------------------------------------------------------------------------
 
 import { useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import StatutSelect from '../components/StatutSelect.jsx'
 import { useConfirmationStatut, auteurSession } from '../components/ConfirmationStatut.jsx'
@@ -95,6 +95,9 @@ const CLASSE_SELECT =
 
 export default function FicheDossier() {
   const { id } = useParams()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const vientDEtreCree = Boolean(location.state?.cree)
   const { dossiers, settings, ajouterInteraction, reaffecterAgent, changerPriorite } =
     useData()
   const dossier = dossiers.find((d) => d.id === id)
@@ -145,6 +148,25 @@ export default function FicheDossier() {
       <Link to="/dossiers" className="mb-3 inline-block text-sm text-cnps-600 hover:underline">
         ← Retour à la liste
       </Link>
+
+      {vientDEtreCree && (
+        <div
+          role="status"
+          className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
+        >
+          <span>
+            Dossier <strong className="tabular-nums">{dossier.numero}</strong> enregistré. Vous
+            pouvez consigner le premier échange ci-dessous.
+          </span>
+          <button
+            type="button"
+            onClick={() => navigate('/nouveau')}
+            className="font-medium text-cnps-600 underline hover:text-cnps-800"
+          >
+            Créer un autre dossier
+          </button>
+        </div>
+      )}
 
       {/* En-tête : numéro, badges, statut, chemin de fer */}
       <div className="mb-4 rounded-lg bg-white p-5 shadow">

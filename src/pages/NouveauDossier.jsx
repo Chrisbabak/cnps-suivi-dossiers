@@ -4,7 +4,7 @@
 // ---------------------------------------------------------------------------
 
 import { useMemo, useState } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 import { useData } from '../context/DataContext.jsx'
 import { getSession } from '../lib/auth.js'
 import { agentsDeLAgence } from '../lib/annuaire.js'
@@ -60,7 +60,7 @@ export default function NouveauDossier() {
   }
 
   const [form, setForm] = useState(formulaireVide)
-  const [confirmation, setConfirmation] = useState(null)
+  const navigate = useNavigate()
 
   const changer = (champ) => (e) => setForm({ ...form, [champ]: e.target.value })
 
@@ -86,28 +86,13 @@ export default function NouveauDossier() {
   const soumettre = (e) => {
     e.preventDefault()
     const dossier = creerDossier({ ...form, matricule: form.matricule.trim() })
-    setConfirmation(dossier.numero)
-    setForm(formulaireVide()) // formulaire prêt pour la saisie suivante
-    window.scrollTo({ top: 0, behavior: 'smooth' })
+    // On bascule directement sur la fiche du dossier créé, avec un bandeau de confirmation.
+    navigate(`/dossiers/${dossier.id}`, { state: { cree: true } })
   }
 
   return (
     <div className="mx-auto max-w-3xl">
       <h1 className="mb-4 text-xl font-semibold text-gray-900">Nouveau dossier</h1>
-
-      {confirmation && (
-        <div
-          role="status"
-          className="mb-4 flex flex-wrap items-center justify-between gap-2 rounded-md border border-emerald-300 bg-emerald-50 px-4 py-3 text-sm text-emerald-900"
-        >
-          <span>
-            Dossier <strong className="tabular-nums">{confirmation}</strong> enregistré avec succès.
-          </span>
-          <Link to="/dossiers" className="font-medium text-cnps-600 underline hover:text-cnps-800">
-            Voir la liste des dossiers
-          </Link>
-        </div>
-      )}
 
       <form onSubmit={soumettre} className="rounded-lg bg-white p-5 shadow sm:p-6">
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -161,8 +146,17 @@ export default function NouveauDossier() {
                 <ul className="mt-1 space-y-0.5">
                   {doublons.map((d) => (
                     <li key={d.id}>
-                      <span className="tabular-nums">{d.numero}</span> · {d.motif} · {d.agence} ·{' '}
-                      {d.statut} ({delaiEnJours(d)} j)
+                      {/* Nouvel onglet : la saisie en cours n'est pas perdue */}
+                      <a
+                        href={`${import.meta.env.BASE_URL}dossiers/${d.id}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        title={`Ouvrir le dossier ${d.numero} dans un nouvel onglet`}
+                        className="font-semibold tabular-nums underline underline-offset-2 hover:text-amber-700"
+                      >
+                        {d.numero} ↗
+                      </a>{' '}
+                      · {d.motif} · {d.agence} · {d.statut} ({delaiEnJours(d)} j)
                     </li>
                   ))}
                 </ul>
