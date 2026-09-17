@@ -120,6 +120,8 @@ export const DEFAULT_SETTINGS = {
     { nom: "P. N'Dri", agence: 'Yamoussoukro' },
   ],
   delaiCible: 5, // délai cible par défaut (motif sans délai propre), en jours
+  // Un technicien peut-il modifier les dossiers de ses collègues de la même agence ?
+  modifDossiersCollegues: true,
   // Délai cible par motif, en jours calendaires (réglable dans Paramètres).
   slaParMotif: {
     Retraite: 30,

@@ -14,13 +14,15 @@ export const STYLES_STATUT = {
   Clôturé: 'bg-gray-200 text-gray-700 border-gray-300',
 }
 
-export default function StatutSelect({ dossier, onChange }) {
+export default function StatutSelect({ dossier, onChange, disabled = false }) {
   return (
     <select
       value={dossier.statut}
       onChange={(e) => onChange(dossier, e.target.value)}
+      disabled={disabled}
+      title={disabled ? 'Lecture seule' : undefined}
       aria-label={`Statut du dossier ${dossier.numero}`}
-      className={`w-full min-w-[9.5rem] cursor-pointer rounded-md border px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-cnps-500 ${
+      className={`w-full min-w-[9.5rem] cursor-pointer rounded-md disabled:cursor-not-allowed disabled:opacity-70 border px-2 py-1 text-xs font-medium focus:outline-none focus:ring-2 focus:ring-cnps-500 ${
         STYLES_STATUT[dossier.statut] || 'bg-gray-100 text-gray-800 border-gray-300'
       }`}
     >

@@ -37,12 +37,17 @@ l'annuaire.
 | --- | --- | --- | --- |
 | Accueil | ses dossiers + agence (lecture) | dossiers et compteurs de l'agence | compteurs globaux, toutes agences |
 | Dossiers | agence **verrouillée** | agence **verrouillée** + **réassignation** (techniciens de son agence) | toutes agences |
+| Modifier un dossier | les siens ; ceux de ses collègues si le réglage l'autorise | ceux de son agence | tous |
 | Supprimer un dossier | non | non | oui |
 | Pilotage | masqué | limité à son agence | national |
 | Paramètres | masqué | masqué | visible |
 
+Un dossier d'une autre agence s'ouvre en **lecture seule** (consultation de la vue nationale).
+Le réglage « Droits des techniciens » (Paramètres) décide si un technicien peut modifier les
+dossiers de ses collègues de la même agence.
+
 La logique de périmètre est centralisée dans [src/lib/permissions.js](src/lib/permissions.js)
-(`canSee`, `getDossierScope`, `canDeleteDossier`, `canReassignDossier`) ; les routes sont
+(`canSee`, `getDossierScope`, `canDeleteDossier`, `canReassignDossier`, `canEditDossier`) ; les routes sont
 gardées (accès direct par URL à un écran interdit → redirection vers l'accueil).
 
 **Vision assuré nationale** (quel que soit le rôle) : cliquer un matricule dans un tableau

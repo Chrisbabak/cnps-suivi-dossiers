@@ -38,3 +38,25 @@ export function canDeleteDossier(role) {
 export function canReassignDossier(role) {
   return role === 'manager'
 }
+
+// Modification d'un dossier (statut, agent, priorité, échanges) :
+// - admin : tous les dossiers ;
+// - manager : les dossiers de son agence ;
+// - technicien : ses dossiers, et ceux de ses collègues de la même agence
+//   si le réglage « modifDossiersCollegues » est actif (Paramètres).
+// Un dossier d'une autre agence est toujours en lecture seule.
+export function canEditDossier(session, dossier, settings) {
+  if (!session || !dossier) return false
+  if (session.role === 'admin') return true
+  if (dossier.agence !== session.agence) return false
+  if (session.role === 'manager') return true
+  return dossier.agent === session.nom || settings?.modifDossiersCollegues !== false
+}
+
+// Explication affichée quand un dossier est en lecture seule.
+export function motifLectureSeule(session, dossier) {
+  if (dossier.agence !== session?.agence) {
+    return `Ce dossier est suivi par l'agence ${dossier.agence}. Vous pouvez le consulter, pas le modifier.`
+  }
+  return `Ce dossier est suivi par ${dossier.agent}. Votre agence ne permet pas de modifier le dossier d'un collègue.`
+}

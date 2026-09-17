@@ -214,6 +214,28 @@ export default function Parametres() {
         />
 
         <div className="rounded-lg bg-white p-4 shadow">
+          <h2 className="mb-1 text-sm font-semibold text-gray-800">Droits des techniciens</h2>
+          <p className="mb-3 text-xs text-gray-500">
+            Un dossier d'une autre agence est toujours en lecture seule. Toute modification est
+            tracée dans le journal, avec le nom de son auteur.
+          </p>
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              checked={settings.modifDossiersCollegues !== false}
+              onChange={(e) => majSettings({ modifDossiersCollegues: e.target.checked })}
+              className="mt-0.5 h-4 w-4 rounded border-gray-300 text-cnps-600 focus:ring-cnps-500"
+            />
+            <span className="text-sm text-gray-700">
+              Un technicien peut modifier les dossiers de ses collègues de la même agence
+              <span className="block text-xs text-gray-500">
+                Utile en cas d'absence. Décoché : il peut les consulter, pas les modifier.
+              </span>
+            </span>
+          </label>
+        </div>
+
+        <div className="rounded-lg bg-white p-4 shadow">
           <h2 className="mb-1 text-sm font-semibold text-gray-800">Délais cibles (SLA) par motif</h2>
           <p className="mb-3 text-xs text-gray-500">
             Un dossier est hors délai quand le nombre de jours calendaires depuis sa réception

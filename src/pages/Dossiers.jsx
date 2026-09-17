@@ -11,7 +11,7 @@ import StatutSelect from '../components/StatutSelect.jsx'
 import { useConfirmationStatut, auteurSession } from '../components/ConfirmationStatut.jsx'
 import ModaleHistoriqueAssure from '../components/ModaleHistoriqueAssure.jsx'
 import { getSession } from '../lib/auth.js'
-import { getDossierScope, canDeleteDossier, canReassignDossier } from '../lib/permissions.js'
+import { getDossierScope, canDeleteDossier, canReassignDossier, canEditDossier } from '../lib/permissions.js'
 import { agentsDeLAgence } from '../lib/annuaire.js'
 import { STATUTS, CANAUX, TYPES, GROUPES_MOTIFS } from '../lib/constants.js'
 import { formatDate, delaiEnJours, enDepassement, delaiCibleDossier } from '../lib/dates.js'
@@ -357,7 +357,7 @@ export default function Dossiers() {
                       </td>
                       {/* stopPropagation : changer le statut ne doit pas ouvrir la fiche */}
                       <td className="px-3 py-2" onClick={(e) => e.stopPropagation()}>
-                        <StatutSelect dossier={d} onChange={demander} />
+                        <StatutSelect dossier={d} onChange={demander} disabled={!canEditDossier(session, d, settings)} />
                       </td>
                       <td
                         className={`whitespace-nowrap px-3 py-2 text-right font-medium ${

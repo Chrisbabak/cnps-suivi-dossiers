@@ -11,6 +11,8 @@ import StatutSelect from '../components/StatutSelect.jsx'
 import { useConfirmationStatut, auteurSession } from '../components/ConfirmationStatut.jsx'
 import Journal, { estEchange, trierJournal } from '../components/Journal.jsx'
 import { agentsDeLAgence } from '../lib/annuaire.js'
+import { getSession } from '../lib/auth.js'
+import { canEditDossier, motifLectureSeule } from '../lib/permissions.js'
 import { STATUTS, PRIORITES, CANAUX_INTERACTION, NOTE_INTERNE } from '../lib/constants.js'
 import {
   formatDate,
@@ -24,7 +26,7 @@ import {
 // Chemin de fer : les 5 étapes du traitement, avec l'étape courante mise
 // en avant et les étapes franchies cochées. Chaque étape est CLIQUABLE :
 // un clic fait passer le dossier à ce statut.
-function CheminDeFer({ statut, onChange }) {
+function CheminDeFer({ statut, onChange, lectureSeule = false }) {
   const indexActuel = STATUTS.indexOf(statut)
   const termine = statut === 'Clôturé'
   return (
@@ -46,7 +48,7 @@ function CheminDeFer({ statut, onChange }) {
             <button
               type="button"
               onClick={() => onChange(etape)}
-              disabled={i === indexActuel}
+              disabled={lectureSeule || i === indexActuel}
               title={i === indexActuel ? 'Statut actuel' : `Passer au statut « ${etape} »`}
               className="group relative z-10 flex flex-col items-center gap-1.5 rounded-md px-0.5 pb-1 focus:outline-none focus:ring-2 focus:ring-cnps-500 disabled:cursor-default"
             >
@@ -122,6 +124,8 @@ export default function FicheDossier() {
     )
   }
 
+  const session = getSession()
+  const modifiable = canEditDossier(session, dossier, settings)
   const delai = delaiEnJours(dossier)
   const depasse = enDepassement(dossier, settings)
   const cible = delaiCibleDossier(dossier, settings)
@@ -148,6 +152,15 @@ export default function FicheDossier() {
       <Link to="/dossiers" className="mb-3 inline-block text-sm text-cnps-600 hover:underline">
         ← Retour à la liste
       </Link>
+
+      {!modifiable && (
+        <div
+          role="note"
+          className="mb-4 rounded-md border border-sky-200 bg-sky-50 px-4 py-3 text-sm text-sky-900"
+        >
+          <strong>Lecture seule.</strong> {motifLectureSeule(session, dossier)}
+        </div>
+      )}
 
       {vientDEtreCree && (
         <div
@@ -193,14 +206,20 @@ export default function FicheDossier() {
               Statut
             </label>
             <div className="w-44" id="statut-fiche">
-              <StatutSelect dossier={dossier} onChange={demander} />
+              <StatutSelect dossier={dossier} onChange={demander} disabled={!modifiable} />
             </div>
           </div>
         </div>
-        <CheminDeFer statut={dossier.statut} onChange={(statut) => demander(dossier, statut)} />
-        <p className="mt-3 text-center text-xs text-gray-400">
-          Cliquez sur une étape pour faire avancer (ou reculer) le dossier.
-        </p>
+        <CheminDeFer
+          statut={dossier.statut}
+          onChange={(statut) => demander(dossier, statut)}
+          lectureSeule={!modifiable}
+        />
+        {modifiable && (
+          <p className="mt-3 text-center text-xs text-gray-400">
+            Cliquez sur une étape pour faire avancer (ou reculer) le dossier.
+          </p>
+        )}
       </div>
 
       {/* Informations du dossier */}
@@ -228,7 +247,8 @@ export default function FicheDossier() {
               value={dossier.agent}
               onChange={(e) => reaffecterAgent(dossier, e.target.value, auteurSession())}
               aria-label="Réaffecter le dossier à un agent"
-              className={CLASSE_SELECT}
+              disabled={!modifiable}
+              className={`${CLASSE_SELECT} disabled:cursor-not-allowed disabled:bg-gray-100`}
             >
               {/* L'agent actuel reste proposé même s'il a été retiré de l'annuaire */}
               {!agentsDeLAgence(settings, dossier.agence).includes(dossier.agent) && (
@@ -244,7 +264,8 @@ export default function FicheDossier() {
               value={dossier.priorite}
               onChange={(e) => changerPriorite(dossier, e.target.value)}
               aria-label="Changer la priorité du dossier"
-              className={CLASSE_SELECT}
+              disabled={!modifiable}
+              className={`${CLASSE_SELECT} disabled:cursor-not-allowed disabled:bg-gray-100`}
             >
               {PRIORITES.map((p) => (
                 <option key={p}>{p}</option>
@@ -269,7 +290,8 @@ export default function FicheDossier() {
       <div className="rounded-lg bg-white p-5 shadow">
         <h2 className="mb-3 text-sm font-semibold text-gray-800">Échanges et suivi</h2>
 
-        {/* Consigner un échange */}
+        {/* Consigner un échange (dossier modifiable uniquement) */}
+        {modifiable && (
         <form onSubmit={soumettre} className="mb-5 rounded-md border border-gray-200 p-3">
           <div className="mb-2 flex flex-wrap items-end gap-3">
             <div>
@@ -347,6 +369,7 @@ export default function FicheDossier() {
             </button>
           </div>
         </form>
+        )}
 
         <Journal evenements={historique} messageVide="Rien à afficher pour ce filtre." />
       </div>
